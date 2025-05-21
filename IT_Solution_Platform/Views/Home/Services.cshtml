@@ -1,0 +1,2518 @@
+﻿@{
+    ViewBag.Title = "Services";
+}
+<!--Services Hero-Section -->
+<section class="hero-section">
+    <div class="hero-background">
+        <div class="grid-overlay"></div>
+        <div class="particles-container" id="services-particles-js"></div>
+    </div>
+
+    <!-- Tech elements -->
+    <div class="tech-element tech-hexagon"></div>
+    <div class="tech-element tech-circuit"></div>
+    <div class="tech-element tech-pulse"></div>
+
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title animate__animated animate__fadeIn">Our Services</h1>
+            <p class="hero-subtitle animate__animated animate__fadeIn animate__delay-1s">Cutting-edge security and development solutions for the digital world.</p>
+            <div class="tech-badge animate__animated animate__fadeIn animate__delay-2s">
+                <span class="badge-text">SECURE • RELIABLE • INNOVATIVE</span>
+                <div class="badge-glow"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!--Services Overview Section-->
+<section class="services-overview">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title animate__animated animate__fadeIn">What We Offer</h2>
+            <div class="title-underline">
+                <span class="line-segment"></span>
+                <span class="line-dot"></span>
+                <span class="line-segment"></span>
+            </div>
+            <p class="section-description animate__animated animate__fadeIn animate__delay-1s">
+                Our comprehensive service suite combines security expertise with development excellence to protect and advance your digital assets.
+            </p>
+        </div>
+
+        <div class="services-grid">
+            <!-- Service Card Navigation -->
+            <div class="service-nav animate__animated animate__fadeInUp">
+                <div class="service-nav-item active" data-target="pentest">
+                    <div class="nav-icon">
+                        <img src="~/Content/Images/Icons/encrypted (1).png" alt="Penetration Testing Icon" width="32" height="32" />
+                    </div>
+                    <span class="nav-text">Penetration Testing</span>
+                    <div class="nav-indicator"></div>
+                </div>
+
+                <div class="service-nav-item" data-target="development">
+                    <div class="nav-icon">
+                        <img src="~/Content/Images/Icons/code (1).png" alt="Development Icon" width="32" height="32" />
+                    </div>
+                    <span class="nav-text">Mobile & Web Development</span>
+                    <div class="nav-indicator"></div>
+                </div>
+
+                <div class="service-nav-item" data-target="network">
+                    <div class="nav-icon">
+                        <img src="~/Content/Images/Icons/global-network.png" alt="Network Icon" width="32" height="32" />
+                    </div>
+                    <span class="nav-text">Network Setup</span>
+                    <div class="nav-indicator"></div>
+                </div>
+
+                <div class="service-nav-item" data-target="custom">
+                    <div class="nav-icon">
+                        <img src="~/Content/Images/Icons/settings.png" alt="Custom Package Icon" width="32" height="32" />
+                    </div>
+                    <span class="nav-text">Custom IT Package</span>
+                    <div class="nav-indicator"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background elements -->
+    <div class="tech-blob left"></div>
+    <div class="tech-blob right"></div>
+</section>
+
+<!--Penetration Testing Service-->
+<section id="pentest" class="service-detail-section active-service">
+    <div class="container">
+        <div class="service-detail">
+            <div class="service-content animate__animated animate__fadeIn">
+                <h2 class="service-title">Penetration Testing</h2>
+                <div class="service-tagline">
+                    <span class="tag">Security</span>
+                    <span class="tag">Vulnerability Assessment</span>
+                    <span class="tag">Remediation</span>
+                </div>
+                <p class="service-description">
+                    Our comprehensive penetration testing identifies vulnerabilities before attackers can exploit them, securing your systems from potential breaches.
+                </p>
+
+                <div class="service-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <img src="~/Content/Images/Icons/testing.png" alt="Web App Testing" width="24" height="24" />
+                        </div>
+                        <div class="feature-text">
+                            <h4>Web Application Testing</h4>
+                            <p>Thorough assessment of web applications for SQL injection, XSS, CSRF, and other OWASP Top 10 vulnerabilities.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <img src="~/Content/Images/Icons/ethical-hacking.png" alt="Network Testing" width="24" height="24" />
+                        </div>
+                        <div class="feature-text">
+                            <h4>Network Infrastructure Testing</h4>
+                            <p>Identifying network vulnerabilities, misconfigurations, and potential entry points for attackers.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <img src="~/Content/Images/Icons/mobile_testing.png" alt="Mobile App Testing" width="24" height="24" />
+                        </div>
+                        <div class="feature-text">
+                            <h4>Mobile Application Testing</h4>
+                            <p>Security assessment of iOS and Android applications for authentication, data storage, and API communication flaws.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <img src="~/Content/Images/Icons/report.png" alt="Report" width="24" height="24" />
+                        </div>
+                        <div class="feature-text">
+                            <h4>Detailed Reporting & Remediation</h4>
+                            <p>Comprehensive reports with prioritized vulnerabilities and actionable remediation steps.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="service-cta">
+                    <a href="@Url.Action("Contact", "Home")" class="service-button">
+                        <span class="button-text">Request a Security Assessment</span>
+                        <span class="button-icon">→</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="service-visual animate__animated animate__fadeInRight">
+                <div class="visual-container">
+                    <div class="security-dashboard">
+                        <div class="dashboard-header">
+                            <span class="system-status">System Scan in Progress</span>
+                            <div class="status-indicator pulse"></div>
+                        </div>
+                        <div class="scan-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill"></div>
+                            </div>
+                            <span class="progress-text">76% Complete</span>
+                        </div>
+                        <div class="scan-results">
+                            <div class="result-item">
+                                <span class="item-name">SQL Injection</span>
+                                <span class="status-high">High Risk</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="item-name">XSS Vulnerability</span>
+                                <span class="status-medium">Medium Risk</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="item-name">CSRF Protection</span>
+                                <span class="status-low">Low Risk</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="item-name">Authentication</span>
+                                <span class="status-secure">Secure</span>
+                            </div>
+                        </div>
+                        <div class="data-stream-visual">01001001 01010000 00110001</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background elements -->
+    <div class="circuit-lines"></div>
+</section>
+
+<!--Mobile & Web Development Service-->
+<section id="development" class="service-detail-section">
+    <div class="container">
+        <div class="service-detail">
+            <div class="service-content animate__animated animate__fadeIn">
+                <h2 class="service-title">Mobile & Web Development</h2>
+                <div class="service-tagline">
+                    <span class="tag">Secure Coding</span>
+                    <span class="tag">Responsive Design</span>
+                    <span class="tag">Performance</span>
+                </div>
+                <p class="service-description">
+                    We build robust, secure, and user-friendly mobile and web applications with security embedded in every line of code.
+                </p>
+
+                <div class="service-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <img src="~/Content/Images/Icons/testing.png" alt="Web Development" width="24" height="24" />
+                        </div>
+                        <div class="feature-text">
+                            <h4>Secure Web Applications</h4>
+                            <p>End-to-end web application development with built-in security measures and OWASP compliance.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <img src="~/Content/Images/Icons/mobile-development.png" alt="Mobile Development" width="24" height="24" />
+                        </div>
+                        <div class="feature-text">
+                            <h4>Mobile Application Development</h4>
+                            <p>Native and cross-platform mobile applications for iOS and Android with secure data handling.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <img src="~/Content/Images/Icons/web-development.png" alt="API Development" width="24" height="24" />
+                        </div>
+                        <div class="feature-text">
+                            <h4>API Development & Integration</h4>
+                            <p>Development of secure REST and GraphQL APIs with proper authentication and authorization.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <img src="~/Content/Images/Icons/rpa.png" alt="Maintenance" width="24" height="24" />
+                        </div>
+                        <div class="feature-text">
+                            <h4>Ongoing Maintenance & Support</h4>
+                            <p>Regular updates, security patches, and continuous improvement of your digital products.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="service-cta">
+                    <a href="@Url.Action("Contact", "Home")" class="service-button">
+                        <span class="button-text">Start Your Development Project</span>
+                        <span class="button-icon">→</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="service-visual animate__animated animate__fadeInRight">
+                <div class="visual-container">
+                    <div class="development-showcase">
+                        <div class="code-window">
+                            <div class="window-header">
+                                <span class="window-title">App.js</span>
+                                <div class="window-controls">
+                                    <span class="control"></span>
+                                    <span class="control"></span>
+                                    <span class="control"></span>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <div class="code-line"><span class="keyword">import</span> React, { useState, useEffect } <span class="keyword">from</span> <span class="string">'react'</span>;</div>
+                                <div class="code-line"><span class="keyword">import</span> { secureFetch } <span class="keyword">from</span> <span class="string">'./utils/api'</span>;</div>
+                                <div class="code-line"><span class="keyword">import</span> { encrypt } <span class="keyword">from</span> <span class="string">'./utils/crypto'</span>;</div>
+                                <div class="code-line"></div>
+                                <div class="code-line"><span class="keyword">function</span> <span class="function">SecureApp</span>() {</div>
+                                <div class="code-line indent">...</div>
+                                <div class="code-line indent"><span class="keyword">return</span> (</div>
+                                <div class="code-line indent-2">&lt;<span class="component">Dashboard</span> /&gt;</div>
+                                <div class="code-line indent">);</div>
+                                <div class="code-line">}</div>
+                            </div>
+                        </div>
+                        <div class="device-mock">
+                            <div class="device-screen">
+                                <div class="app-interface">
+                                    <div class="app-header"></div>
+                                    <div class="app-content">
+                                        <div class="content-block"></div>
+                                        <div class="content-block"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background elements -->
+    <div class="code-pattern"></div>
+</section>
+
+<!--Network Setup Service-->
+<section id="network" class="service-detail-section">
+    <div class="container">
+        <div class="service-detail">
+            <div class="service-content animate__animated animate__fadeIn">
+                <h2 class="service-title">Network Setup</h2>
+                <div class="service-tagline">
+                    <span class="tag">Infrastructure</span>
+                    <span class="tag">Security</span>
+                    <span class="tag">Optimization</span>
+                </div>
+                <p class="service-description">
+                    From small office networks to enterprise infrastructure, we design, implement, and secure robust network solutions.
+                </p>
+
+                <div class="service-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <img src="~/Content/Images/Icons/global-network.png" alt="Network Design" width="24" height="24" />
+                        </div>
+                        <div class="feature-text">
+                            <h4>Network Architecture & Design</h4>
+                            <p>Custom network topologies designed for scalability, security, and performance.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <img src="~/Content/Images/Icons/encrypted (1).png" alt="Security Implementation" width="24" height="24" />
+                        </div>
+                        <div class="feature-text">
+                            <h4>Security Implementation</h4>
+                            <p>Firewalls, IDS/IPS, VPNs, and network segmentation to protect your digital assets.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <img src="~/Content/Images/Icons/computer.png" alt="Cloud Integration" width="24" height="24" />
+                        </div>
+                        <div class="feature-text">
+                            <h4>Cloud Integration</h4>
+                            <p>Seamless integration of on-premise networks with cloud services and infrastructure.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <img src="~/Content/Images/Icons/rpa.png" alt="Monitoring" width="24" height="24" />
+                        </div>
+                        <div class="feature-text">
+                            <h4>Network Monitoring & Maintenance</h4>
+                            <p>Proactive monitoring, issue detection, and regular maintenance to ensure optimal uptime.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="service-cta">
+                    <a href="@Url.Action("Contact", "Home")" class="service-button">
+                        <span class="button-text">Consult About Network Solutions</span>
+                        <span class="button-icon">→</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="service-visual animate__animated animate__fadeInRight">
+                <div class="visual-container">
+                    <!-- Updated Network Diagram HTML -->
+                    <div class="network-diagram">
+                        <div class="diagram-nodes">
+                            <div class="node server">
+                                <div class="node-icon"></div>
+                                <span class="node-label">Core Server</span>
+                                <div class="node-status online"></div>
+                            </div>
+                            <div class="node firewall">
+                                <div class="node-icon"></div>
+                                <span class="node-label">Firewall</span>
+                                <div class="node-status online"></div>
+                            </div>
+                            <div class="node switch">
+                                <div class="node-icon"></div>
+                                <span class="node-label">Switch</span>
+                                <div class="node-status online"></div>
+                            </div>
+                            <div class="node cloud">
+                                <div class="node-icon"></div>
+                                <span class="node-label">Cloud Services</span>
+                                <div class="node-status online"></div>
+                            </div>
+                            <div class="node endpoint">
+                                <div class="node-icon"></div>
+                                <span class="node-label">Endpoints</span>
+                                <div class="node-status online"></div>
+                            </div>
+                        </div>
+
+                        <div class="diagram-connections">
+                            <!-- Precise connections between nodes -->
+                            <div class="connection server-firewall">
+                                <div class="data-packet"></div>
+                            </div>
+                            <div class="connection server-cloud">
+                                <div class="data-packet"></div>
+                            </div>
+                            <div class="connection firewall-switch">
+                                <div class="data-packet"></div>
+                            </div>
+                            <div class="connection switch-endpoint">
+                                <div class="data-packet"></div>
+                            </div>
+                            <div class="connection cloud-endpoint">
+                                <div class="data-packet"></div>
+                            </div>
+                            <div class="connection server-switch">
+                                <div class="data-packet"></div>
+                            </div>
+                        </div>
+
+                        <div class="diagram-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Network Load</span>
+                                <span class="stat-value">43%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Uptime</span>
+                                <span class="stat-value">99.9%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Latency</span>
+                                <span class="stat-value">3ms</span>
+                            </div>
+                        </div>
+
+                        <!-- Background elements -->
+                        <div class="network-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</section>
+
+<!--Custom IT Package Service-->
+<section id="custom" class="service-detail-section">
+    <div class="container">
+        <div class="service-detail">
+            <div class="service-content animate__animated animate__fadeIn">
+                <h2 class="service-title">Custom IT Package</h2>
+                <div class="service-tagline">
+                    <span class="tag">Tailored</span>
+                    <span class="tag">Comprehensive</span>
+                    <span class="tag">Cost-Effective</span>
+                </div>
+                <p class="service-description">
+                    Our customized IT solutions combine services to meet your specific business needs and budget constraints.
+                </p>
+
+                <div class="service-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <img src="~/Content/Images/Icons/report.png" alt="Assessment" width="24" height="24" />
+                        </div>
+                        <div class="feature-text">
+                            <h4>Needs Assessment</h4>
+                            <p>Comprehensive evaluation of your current infrastructure, security posture, and business requirements.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <img src="~/Content/Images/Icons/laptop.png" alt="Custom Solutions" width="24" height="24" />
+                        </div>
+                        <div class="feature-text">
+                            <h4>Custom Solution Design</h4>
+                            <p>Tailored combination of services to address your unique challenges and objectives.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <img src="~/Content/Images/Icons/code (1).png" alt="Implementation" width="24" height="24" />
+                        </div>
+                        <div class="feature-text">
+                            <h4>Seamless Implementation</h4>
+                            <p>Coordinated deployment of all services with minimal disruption to your operations.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <img src="~/Content/Images/Icons/settings.png" alt="Management" width="24" height="24" />
+                        </div>
+                        <div class="feature-text">
+                            <h4>End-to-End Management</h4>
+                            <p>Ongoing management, support, and optimization of your integrated IT ecosystem.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="service-cta">
+                    <a href="@Url.Action("Contact", "Home")" class="service-button">
+                        <span class="button-text">Get Your Custom IT Package</span>
+                        <span class="button-icon">→</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="service-visual animate__animated animate__fadeInRight">
+                <div class="visual-container">
+                    <div class="package-builder">
+                        <div class="package-header">
+                            <h4>Custom Solution Creator</h4>
+                        </div>
+                        <div class="package-components">
+                            <div class="component selected">
+                                <span class="component-name">Penetration Testing</span>
+                                <div class="component-check"></div>
+                            </div>
+                            <div class="component selected">
+                                <span class="component-name">Web Development</span>
+                                <div class="component-check"></div>
+                            </div>
+                            <div class="component">
+                                <span class="component-name">Mobile Development</span>
+                                <div class="component-check"></div>
+                            </div>
+                            <div class="component selected">
+                                <span class="component-name">Network Setup</span>
+                                <div class="component-check"></div>
+                            </div>
+                            <div class="component">
+                                <span class="component-name">Ongoing Maintenance</span>
+                                <div class="component-check"></div>
+                            </div>
+                            <div class="component selected">
+                                <span class="component-name">Security Training</span>
+                                <div class="component-check"></div>
+                            </div>
+                        </div>
+                        <div class="package-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">Selected Services</span>
+                                <span class="summary-value">4</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Recommended Add-ons</span>
+                                <span class="summary-value">2</span>
+                            </div>
+                            <div class="summary-action">
+                                <div class="action-button">Calculate Estimate</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background elements -->
+    <div class="hex-pattern-alt"></div>
+</section>
+
+<!--Process Section-->
+<section class="process-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title animate__animated animate__fadeIn">Our Process</h2>
+            <div class="title-underline">
+                <span class="line-segment"></span>
+                <span class="line-dot"></span>
+                <span class="line-segment"></span>
+            </div>
+        </div>
+
+        <div class="process-timeline">
+            <div class="timeline-item animate__animated animate__fadeInUp">
+                <div class="timeline-number">01</div>
+                <div class="timeline-content">
+                    <h3 class="step-title">Discovery & Assessment</h3>
+                    <p class="step-description">We begin by understanding your business goals, challenges, and technical requirements.</p>
+                </div>
+                <div class="timeline-connector"></div>
+            </div>
+
+            <div class="timeline-item animate__animated animate__fadeInUp animate__delay-1s">
+                <div class="timeline-number">02</div>
+                <div class="timeline-content">
+                    <h3 class="step-title">Solution Design</h3>
+                    <p class="step-description">Our experts design a customized solution that addresses your specific needs and objectives.</p>
+                </div>
+                <div class="timeline-connector"></div>
+            </div>
+
+            <div class="timeline-item animate__animated animate__fadeInUp animate__delay-2s">
+                <div class="timeline-number">03</div>
+                <div class="timeline-content">
+                    <h3 class="step-title">Implementation</h3>
+                    <p class="step-description">We deploy our solutions with careful attention to minimizing disruption to your operations.</p>
+                </div>
+                <div class="timeline-connector"></div>
+            </div>
+
+            <div class="timeline-item animate__animated animate__fadeInUp animate__delay-3s">
+                <div class="timeline-number">04</div>
+                <div class="timeline-content">
+                    <h3 class="step-title">Testing & Optimization</h3>
+                    <p class="step-description">Rigorous testing ensures everything works seamlessly, followed by performance optimization.</p>
+                </div>
+                <div class="timeline-connector"></div>
+            </div>
+
+            <div class="timeline-item animate__animated animate__fadeInUp animate__delay-4s">
+                <div class="timeline-number">05</div>
+                <div class="timeline-content">
+                    <h3 class="step-title">Ongoing Support</h3>
+                    <p class="step-description">We provide continuous maintenance, updates, and support to ensure long-term success.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background elements -->
+    <div class="tech-grid horizontal"></div>
+    <div class="data-stream-bg"></div>
+</section>
+
+<!--CTA Ready to secure your future -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-container animate__animated animate__fadeIn">
+            <div class="cta-content">
+                <h2 class="cta-title">Ready for Future-Proof IT Solutions?</h2>
+                <p class="cta-text">Let's discuss how our services can transform your business security and development needs.</p>
+                <a href="@Url.Action("Contact", "Home")" class="cta-button">
+                    <span class="button-text">Schedule a Consultation</span>
+                    <span class="button-icon">→</span>
+                </a>
+            </div>
+            <div class="cta-decoration">
+                <div class="tech-rings"></div>
+                <div class="pulse-dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background elements -->
+    <div class="graph-lines"></div>
+</section>
+<style>
+    /* Global Styles */
+    body {
+        background-color: #0d1117;
+        color: #ffffff;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .container {
+        max-width: 1200px;
+        width: 100%;
+        padding: 0 32px;
+        margin: 0 auto;
+        z-index: 2;
+        position: relative;
+    }
+
+    /* Animation Classes */
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes fadeInGrid {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 0.5;
+        }
+    }
+
+    @@keyframes pulseHex {
+        0% {
+            transform: scale(1);
+            opacity: 0.5;
+        }
+
+        50% {
+            transform: scale(1.05);
+            opacity: 0.7;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 0.5;
+        }
+    }
+
+
+    @@keyframes floatElement {
+        0% {
+            transform: translateY(0) perspective(500px) rotateY(30deg);
+        }
+
+        50% {
+            transform: translateY(-15px) perspective(500px) rotateY(30deg);
+        }
+
+        100% {
+            transform: translateY(0) perspective(500px) rotateY(30deg);
+        }
+    }
+
+    @@keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 0.6;
+        }
+
+        50% {
+            transform: scale(1.2);
+            opacity: 0.8;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 0.6;
+        }
+    }
+
+    @@keyframes dataStream {
+        0% {
+            transform: translateX(0);
+        }
+
+        100% {
+            transform: translateX(-50%);
+        }
+    }
+
+    @@keyframes blink {
+        0%, 100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.3;
+        }
+    }
+
+    /* Animate.css-like classes */
+    .animate__animated {
+        animation-duration: 1s;
+        animation-fill-mode: both;
+    }
+
+    .animate__fadeIn {
+        animation-name: fadeIn;
+    }
+
+    .animate__fadeInUp {
+        animation-name: fadeInUp;
+    }
+
+    .animate__fadeInRight {
+        animation-name: fadeInRight;
+    }
+
+    .animate__delay-1s {
+        animation-delay: 0.2s;
+    }
+
+    .animate__delay-2s {
+        animation-delay: 0.4s;
+    }
+
+    .animate__delay-3s {
+        animation-delay: 0.6s;
+    }
+
+    .animate__delay-4s {
+        animation-delay: 0.8s;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        position: relative;
+        min-height: 500px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        margin: 0;
+        padding: 80px 0;
+        background-color: #0d1117;
+    }
+
+    .hero-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+    }
+
+    .grid-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: linear-gradient(rgba(0, 255, 247, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 247, 0.05) 1px, transparent 1px);
+        background-size: 40px 40px;
+        z-index: 0;
+        opacity: 0;
+        animation: fadeInGrid 2s ease forwards 0.5s;
+    }
+
+    .particles-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Tech elements */
+    .tech-element {
+        position: absolute;
+        opacity: 0;
+        z-index: 1;
+        animation: fadeIn 1.5s ease forwards 0.5s;
+    }
+
+    .tech-hexagon {
+        width: 300px;
+        height: 260px;
+        background: linear-gradient(145deg, rgba(0, 255, 247, 0.05), transparent);
+        clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        top: 10%;
+        right: 10%;
+        animation: pulseHex 15s ease-in-out infinite;
+    }
+
+    .tech-circuit {
+        width: 200px;
+        height: 300px;
+        background-image: linear-gradient(rgba(0, 255, 247, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 247, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+        bottom: 10%;
+        left: 5%;
+        transform: perspective(500px) rotateY(30deg);
+        opacity: 0;
+        animation: fadeIn 2s ease forwards 1s, floatElement 8s ease-in-out infinite;
+    }
+
+    .tech-pulse {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(0, 255, 247, 0.1) 0%, transparent 70%);
+        top: 50%;
+        left: 20%;
+        transform: translateY(-50%);
+        animation: pulse 4s ease-in-out infinite;
+    }
+
+    .hero-content {
+        text-align: center;
+        z-index: 2;
+        position: relative;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .hero-title {
+        font-size: 4rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        background: linear-gradient(90deg, #ffffff, #00fff7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        font-weight: 300;
+        margin-bottom: 2rem;
+        color: #b3b3b3;
+        line-height: 1.5;
+    }
+
+    .tech-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        background-color: rgba(0, 255, 247, 0.1);
+        border: 1px solid rgba(0, 255, 247, 0.3);
+        border-radius: 4px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .badge-text {
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        color: #00fff7;
+        position: relative;
+        z-index: 2;
+    }
+
+    .badge-glow {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 247, 0.3), transparent);
+        animation: badgeGlow 3s ease-in-out infinite;
+    }
+
+    @@keyframes badgeGlow {
+        0% {
+            left: -100%;
+        }
+
+        50% {
+            left: 100%;
+        }
+
+        100% {
+            left: 100%;
+        }
+    }
+
+    /* Services Overview Section */
+    .services-overview {
+        padding: 100px 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 60px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #ffffff;
+    }
+
+    .title-underline {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .line-segment {
+        height: 2px;
+        width: 40px;
+        background: linear-gradient(90deg, transparent, #00fff7);
+    }
+
+        .line-segment:last-child {
+            background: linear-gradient(90deg, #00fff7, transparent);
+        }
+
+    .line-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #00fff7;
+        margin: 0 10px;
+    }
+
+    .section-description {
+        max-width: 700px;
+        margin: 0 auto;
+        font-size: 1.1rem;
+        color: #b3b3b3;
+        line-height: 1.6;
+    }
+
+    .services-grid {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 2;
+    }
+
+    .service-nav {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        background-color: rgba(13, 17, 23, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 15px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    .service-nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 15px 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+        .service-nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .service-nav-item.active {
+            background-color: rgba(0, 255, 247, 0.1);
+        }
+
+    .nav-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .service-nav-item.active .nav-icon {
+        background-color: rgba(0, 255, 247, 0.2);
+    }
+
+    .nav-text {
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .service-nav-item.active .nav-text {
+        color: #00fff7;
+    }
+
+    .nav-indicator {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 30px;
+        height: 3px;
+        background-color: #00fff7;
+        border-radius: 3px;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .service-nav-item.active .nav-indicator {
+        opacity: 1;
+    }
+
+    .tech-blob {
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.1;
+        z-index: 0;
+    }
+
+        .tech-blob.left {
+            background-color: #00fff7;
+            top: -100px;
+            left: -200px;
+        }
+
+        .tech-blob.right {
+            background-color: #00d8ff;
+            bottom: -100px;
+            right: -200px;
+        }
+
+    /* Service Detail Sections */
+    .service-detail-section {
+        padding: 100px 0;
+        position: relative;
+        overflow: hidden;
+        display: none;
+    }
+
+        .service-detail-section.active-service {
+            display: block;
+        }
+
+    .service-detail {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .service-content {
+        flex: 1;
+        padding-right: 40px;
+        min-width: 300px;
+    }
+
+    .service-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #ffffff;
+    }
+
+    .service-tagline {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .tag {
+        font-size: 0.8rem;
+        font-weight: 600;
+        background-color: rgba(0, 255, 247, 0.1);
+        color: #00fff7;
+        padding: 4px 12px;
+        border-radius: 20px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+    }
+
+    .service-description {
+        font-size: 1.1rem;
+        color: #b3b3b3;
+        line-height: 1.6;
+        margin-bottom: 30px;
+    }
+
+    .service-features {
+        margin-bottom: 40px;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+
+    .feature-icon {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        background-color: rgba(0, 255, 247, 0.1);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+    }
+
+    .feature-text {
+        flex-grow: 1;
+    }
+
+        .feature-text h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            color: #ffffff;
+        }
+
+        .feature-text p {
+            font-size: 0.95rem;
+            color: #b3b3b3;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+    .service-cta {
+        margin-top: 30px;
+    }
+
+    .service-button {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 24px;
+        background-color: rgba(0, 255, 247, 0.1);
+        border: 1px solid rgba(0, 255, 247, 0.3);
+        border-radius: 8px;
+        color: #00fff7;
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+        .service-button:hover {
+            background-color: rgba(0, 255, 247, 0.2);
+            transform: translateY(-2px);
+        }
+
+    .button-text {
+        margin-right: 10px;
+    }
+
+    .button-icon {
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+    }
+
+    .service-button:hover .button-icon {
+        transform: translateX(5px);
+    }
+
+    .service-visual {
+        flex: 1;
+        min-width: 300px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .visual-container {
+        width: 100%;
+        max-width: 500px;
+        height: 400px;
+        background-color: rgba(13, 17, 23, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        position: relative;
+    }
+
+    /* Penetration Testing Visual */
+    .security-dashboard {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        background-color: #0d1117;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .system-status {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #00fff7;
+    }
+
+    .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #00fff7;
+    }
+
+        .status-indicator.pulse {
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+    .scan-progress {
+        margin-bottom: 20px;
+    }
+
+    .progress-bar {
+        height: 10px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
+
+    .progress-fill {
+        height: 100%;
+        width: 76%;
+        background: linear-gradient(90deg, #00fff7, #0088ff);
+        border-radius: 5px;
+        position: relative;
+    }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: progressGlow 2s ease-in-out infinite;
+        }
+
+    @@keyframes progressGlow {
+        0% {
+            transform: translateX(-100%);
+        }
+
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    .progress-text {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .scan-results {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .result-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    .item-name {
+        font-size: 0.9rem;
+        color: #ffffff;
+    }
+
+    .status-high {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #ff3e3e;
+    }
+
+    .status-medium {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #ffae00;
+    }
+
+    .status-low {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #ffdd00;
+    }
+
+    .status-secure {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #00ff88;
+    }
+
+    .data-stream-visual {
+        font-family: monospace;
+        font-size: 0.8rem;
+        color: rgba(0, 255, 247, 0.7);
+        margin-top: 15px;
+        overflow: hidden;
+        white-space: nowrap;
+        animation: dataStream 10s linear infinite;
+    }
+
+    .circuit-lines {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(circle at 20% 30%, rgba(0, 255, 247, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(0, 255, 247, 0.05) 0%, transparent 50%);
+        z-index: 0;
+    }
+
+    /* Development Visual */
+    .development-showcase {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .code-window {
+        width: 100%;
+        flex-grow: 1;
+        background-color: #1a1e24;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 15px;
+    }
+
+    .window-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #2a2e34;
+        padding: 10px 15px;
+    }
+
+    .window-title {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .window-controls {
+        display: flex;
+    }
+
+    .control {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-left: 8px;
+        background-color: rgba(255, 255, 255, 0.3);
+    }
+
+        .control:nth-child(1) {
+            background-color: #ff5f56;
+        }
+
+        .control:nth-child(2) {
+            background-color: #ffbd2e;
+        }
+
+        .control:nth-child(3) {
+            background-color: #27c93f;
+        }
+
+    .code-content {
+        padding: 15px;
+        font-family: monospace;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1.5;
+    }
+
+    .code-line {
+        margin-bottom: 5px;
+    }
+
+    .keyword {
+        color: #ff79c6;
+    }
+
+    .string {
+        color: #f1fa8c;
+    }
+
+    .function {
+        color: #50fa7b;
+    }
+
+    .component {
+        color: #8be9fd;
+    }
+
+    .indent {
+        padding-left: 20px;
+    }
+
+    .indent-2 {
+        padding-left: 40px;
+    }
+
+    .device-mock {
+        width: 120px;
+        height: 230px;
+        background-color: #2a2e34;
+        border-radius: 20px;
+        overflow: hidden;
+        position: relative;
+        margin: 0 auto;
+        border: 5px solid #1a1e24;
+    }
+
+    .device-screen {
+        position: absolute;
+        top: 10px;
+        left: 5px;
+        right: 5px;
+        bottom: 10px;
+        background-color: #0d1117;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .app-interface {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .app-header {
+        height: 20px;
+        background-color: rgba(0, 255, 247, 0.1);
+        margin-bottom: 10px;
+    }
+
+    .app-content {
+        flex-grow: 1;
+        padding: 5px;
+    }
+
+    .content-block {
+        height: 40px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+        margin-bottom: 8px;
+    }
+
+    .code-pattern {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: linear-gradient(rgba(0, 255, 247, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 247, 0.03) 1px, transparent 1px);
+        background-size: 20px 20px;
+        z-index: 0;
+        opacity: 0.5;
+    }
+
+    /* Network Setup Visual */
+    .network-diagram {
+        width: 100%;
+        height: 400px;
+        padding: 20px;
+        position: relative;
+        background-color: rgba(0, 20, 40, 0.8);
+        border-radius: 10px;
+        box-shadow: 0 0 30px rgba(0, 255, 247, 0.2);
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    /* Nodes styling */
+    .diagram-nodes {
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+
+    .node {
+        position: absolute;
+        width: 90px;
+        height: 90px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+        transition: all 0.3s ease;
+    }
+
+        .node:hover {
+            transform: scale(1.1);
+        }
+
+    .node-icon {
+        width: 50px;
+        height: 50px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        margin-bottom: 8px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 15px rgba(0, 255, 247, 0.3);
+        border: 1px solid rgba(0, 255, 247, 0.5);
+    }
+
+    /* Icon specific styling */
+    .node.server .node-icon:before {
+        content: '';
+        width: 30px;
+        height: 30px;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300fff7"><path d="M4,1h16c1.1,0,2,0.9,2,2v4c0,1.1-0.9,2-2,2H4C2.9,9,2,8.1,2,7V3C2,1.9,2.9,1,4,1z M4,11h16c1.1,0,2,0.9,2,2v4c0,1.1-0.9,2-2,2H4c-1.1,0-2-0.9-2-2v-4C2,11.9,2.9,11,4,11z M2,19c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2v-2H2V19z"/></svg>');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .node.firewall .node-icon:before {
+        content: '';
+        width: 30px;
+        height: 30px;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300fff7"><path d="M12,1L3,5v6c0,5.55,3.84,10.74,9,12c5.16-1.26,9-6.45,9-12V5L12,1z M12,11.99h7c-0.53,4.12-3.28,7.79-7,8.94V12H5V6.3l7-3.11V11.99z"/></svg>');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .node.switch .node-icon:before {
+        content: '';
+        width: 30px;
+        height: 30px;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300fff7"><path d="M20,6h-8l-2-2H4C2.9,4,2.01,4.9,2.01,6L2,18c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V8C22,6.9,21.1,6,20,6z M20,18H4V8h16V18z M8,13.01l1.41,1.41L11,12.84V17h2v-4.16l1.59,1.59L16,13.01L12.01,9L8,13.01z"/></svg>');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .node.cloud .node-icon:before {
+        content: '';
+        width: 30px;
+        height: 30px;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300fff7"><path d="M19.35,10.04C18.67,6.59,15.64,4,12,4C9.11,4,6.6,5.64,5.35,8.04C2.34,8.36,0,10.91,0,14c0,3.31,2.69,6,6,6h13c2.76,0,5-2.24,5-5C24,12.36,21.95,10.22,19.35,10.04z"/></svg>');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .node.endpoint .node-icon:before {
+        content: '';
+        width: 30px;
+        height: 30px;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300fff7"><path d="M21,2H3C1.9,2,1,2.9,1,4v16c0,1.1,0.9,2,2,2h18c1.1,0,2-0.9,2-2V4C23,2.9,22.1,2,21,2z M21,20H3V6h18V20z"/></svg>');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+
+    /* Node positions */
+    .node.server {
+        top: 20%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .node.firewall {
+        top: 40%;
+        left: 20%;
+    }
+
+    .node.switch {
+        top: 70%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .node.cloud {
+        top: 30%;
+        right: 20%;
+    }
+
+    .node.endpoint {
+        bottom: 15%;
+        right: 25%;
+    }
+    /* This ensures all node contents are centered */
+    .node.server, .node.switch {
+        transform: translateX(-50%);
+    }
+
+    .node .node-icon {
+        position: relative;
+        z-index: 3;
+    }
+
+    .node-label {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.9);
+        text-align: center;
+        text-shadow: 0 0 5px rgba(0, 255, 247, 0.5);
+        font-weight: 500;
+    }
+
+    .node-status {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-top: 5px;
+    }
+
+        .node-status.online {
+            background-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.7);
+            animation: pulse 2s infinite;
+        }
+
+    /* Connections styling */
+    .diagram-connections {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+
+    /* Using pseudo-elements for better connections */
+    .connection {
+        position: absolute;
+        background-color: transparent;
+        pointer-events: none;
+        height: 2px;
+        transform-origin: left center;
+    }
+
+        /* Connection line content */
+        .connection:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(0, 255, 247, 0.5), rgba(0, 255, 247, 0.3));
+        }
+
+        /* Server to Firewall */
+        .connection.server-firewall {
+            top: calc(20% + 45px);
+            left: calc(50% - 25px);
+            width: 180px;
+            transform: rotate(205deg);
+        }
+
+        /* Server to Cloud */
+        .connection.server-cloud {
+            top: calc(20% + 45px);
+            left: calc(50% + 25px);
+            width: 150px;
+            transform: rotate(-25deg);
+        }
+
+        /* Firewall to Switch */
+        .connection.firewall-switch {
+            top: calc(40% + 45px);
+            left: calc(20% + 45px);
+            width: 200px;
+            transform: rotate(45deg);
+        }
+
+        /* Switch to Endpoint */
+        .connection.switch-endpoint {
+            top: calc(70% + 25px);
+            left: calc(50% + 20px);
+            width: 140px;
+            transform: rotate(-40deg);
+        }
+
+        /* Cloud to Endpoint */
+        .connection.cloud-endpoint {
+            top: calc(30% + 45px);
+            right: calc(20% + 10px);
+            width: 160px;
+            transform: rotate(80deg);
+            transform-origin: right center;
+        }
+
+        /* Server to Switch - direct vertical connection */
+        .connection.server-switch {
+            top: calc(20% + 45px);
+            left: 50%;
+            width: 130px;
+            transform: rotate(90deg);
+        }
+
+    /* Data packet animations */
+    .data-packet {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background-color: #00fff7;
+        border-radius: 50%;
+        box-shadow: 0 0 8px rgba(0, 255, 247, 0.8);
+        animation: movePacket 3s linear infinite;
+        top: -2px; /* Center vertically on the line */
+    }
+
+    .connection.server-firewall .data-packet {
+        animation-delay: 0.2s;
+    }
+
+    .connection.server-cloud .data-packet {
+        animation-delay: 0.5s;
+    }
+
+    .connection.firewall-switch .data-packet {
+        animation-delay: 1s;
+    }
+
+    .connection.switch-endpoint .data-packet {
+        animation-delay: 1.5s;
+    }
+
+    .connection.cloud-endpoint .data-packet {
+        animation-delay: 0.8s;
+    }
+
+    .connection.server-switch .data-packet {
+        animation-delay: 0.3s;
+    }
+
+    .connection.server-firewall .data-packet {
+        animation-delay: 0.2s;
+    }
+
+    .connection.server-cloud .data-packet {
+        animation-delay: 0.5s;
+    }
+
+    .connection.firewall-switch .data-packet {
+        animation-delay: 1s;
+    }
+
+    .connection.switch-endpoint .data-packet {
+        animation-delay: 1.5s;
+    }
+
+    .connection.cloud-endpoint .data-packet {
+        animation-delay: 0.8s;
+        right: 0; /* Start from right side for this connection */
+        left: auto;
+        animation: movePacketReverse 3s linear infinite;
+        animation-delay: 0.8s;
+    }
+
+    .connection.server-switch .data-packet {
+        animation-delay: 0.3s;
+    }
+
+    /* Network stats styling */
+    .diagram-stats {
+        position: absolute;
+        bottom: 15px;
+        left: 15px;
+        display: flex;
+        gap: 15px;
+        background-color: rgba(0, 20, 40, 0.6);
+        padding: 8px 12px;
+        border-radius: 6px;
+        border-left: 3px solid #00fff7;
+    }
+
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .stat-value {
+        font-size: 1rem;
+        color: #00fff7;
+        font-weight: bold;
+    }
+
+    /* Background grid */
+    .network-grid {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: linear-gradient(rgba(0, 255, 247, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 247, 0.05) 1px, transparent 1px);
+        background-size: 20px 20px;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .button-row {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .control-button {
+        background-color: rgba(0, 255, 247, 0.1);
+        color: #00fff7;
+        border: 1px solid rgba(0, 255, 247, 0.5);
+        padding: 8px 15px;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .control-button:hover {
+            background-color: rgba(0, 255, 247, 0.2);
+            box-shadow: 0 0 10px rgba(0, 255, 247, 0.3);
+        }
+
+    /* Animations */
+    @@keyframes movePacket {
+        0% {
+            left: 0;
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 1;
+        }
+
+        90% {
+            opacity: 1;
+        }
+
+        100% {
+            left: 100%;
+            opacity: 0;
+        }
+    }
+
+    @@keyframes movePacketReverse {
+        0% {
+            right: 0;
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 1;
+        }
+
+        90% {
+            opacity: 1;
+        }
+
+        100% {
+            right: 100%;
+            opacity: 0;
+        }
+    }
+
+    /* Additional hover effects */
+    .node:hover .node-icon {
+        box-shadow: 0 0 20px rgba(0, 255, 247, 0.8);
+    }
+
+    /* Add subtle animation to the whole diagram */
+    .network-diagram {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+
+    /* Custom IT Package Visual */
+    .package-builder {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .package-header {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+        .package-header h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #00fff7;
+            margin: 0;
+        }
+
+    .package-components {
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+
+    .component {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+        .component:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .component.selected {
+            background-color: rgba(0, 255, 247, 0.1);
+            border: 1px solid rgba(0, 255, 247, 0.3);
+        }
+
+    .component-name {
+        font-size: 0.9rem;
+        color: #ffffff;
+    }
+
+    .component-check {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .component.selected .component-check {
+        border-color: #00fff7;
+        background-color: rgba(0, 255, 247, 0.2);
+    }
+
+        .component.selected .component-check::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #00fff7;
+        }
+
+    .package-summary {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .summary-label {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .summary-value {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #00fff7;
+    }
+
+    .summary-action {
+        margin-top: 15px;
+        text-align: center;
+    }
+
+    .action-button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: rgba(0, 255, 247, 0.2);
+        border: 1px solid rgba(0, 255, 247, 0.3);
+        border-radius: 8px;
+        color: #00fff7;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .action-button:hover {
+            background-color: rgba(0, 255, 247, 0.3);
+            transform: translateY(-2px);
+        }
+
+    .hex-pattern-alt {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(hexagon at 30% 30%, rgba(0, 255, 247, 0.05) 0%, transparent 30%), radial-gradient(hexagon at 70% 70%, rgba(0, 255, 247, 0.05) 0%, transparent 30%);
+        z-index: 0;
+        opacity: 0.6;
+    }
+
+    /* Process Section */
+    .process-section {
+        padding: 100px 0;
+        position: relative;
+        overflow: hidden;
+        background-color: rgba(13, 17, 23, 0.5);
+    }
+
+    .process-timeline {
+        max-width: 900px;
+        margin: 60px auto 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .timeline-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 50px;
+        position: relative;
+    }
+
+    .timeline-number {
+        flex-shrink: 0;
+        width: 60px;
+        height: 60px;
+        background-color: rgba(0, 255, 247, 0.1);
+        border: 2px solid rgba(0, 255, 247, 0.3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #00fff7;
+        margin-right: 25px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .timeline-content {
+        flex-grow: 1;
+        padding-top: 10px;
+    }
+
+    .step-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 0 0 10px 0;
+        color: #ffffff;
+    }
+
+    .step-description {
+        font-size: 1rem;
+        color: #b3b3b3;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .timeline-connector {
+        position: absolute;
+        top: 60px;
+        left: 30px;
+        width: 2px;
+        height: calc(100% + 20px);
+        background: linear-gradient(to bottom, #00fff7, rgba(0, 255, 247, 0.2));
+        z-index: 1;
+    }
+
+    .tech-grid.horizontal {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: linear-gradient(rgba(0, 255, 247, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        z-index: 0;
+        opacity: 0.5;
+    }
+
+    .data-stream-bg {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 20%;
+        background: linear-gradient(to top, rgba(0, 255, 247, 0.05), transparent);
+        z-index: 0;
+    }
+
+    /* CTA Section */
+    .cta-section {
+        padding: 100px 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background-color: rgba(13, 17, 23, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 60px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .cta-content {
+        flex: 2;
+        padding-right: 40px;
+    }
+
+    .cta-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0 0 20px 0;
+        color: #ffffff;
+    }
+
+    .cta-text {
+        font-size: 1.1rem;
+        color: #b3b3b3;
+        line-height: 1.6;
+        margin: 0 0 30px 0;
+    }
+
+    .cta-button {
+        display: inline-flex;
+        align-items: center;
+        padding: 14px 28px;
+        background-color: rgba(0, 255, 247, 0.2);
+        border: 1px solid rgba(0, 255, 247, 0.4);
+        border-radius: 8px;
+        color: #00fff7;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+        .cta-button:hover {
+            background-color: rgba(0, 255, 247, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 255, 247, 0.2);
+        }
+
+    .cta-decoration {
+        flex: 1;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+    }
+
+    .tech-rings {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        border: 2px solid rgba(0, 255, 247, 0.2);
+        position: relative;
+    }
+
+        .tech-rings::before, .tech-rings::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 2px solid rgba(0, 255, 247, 0.2);
+        }
+
+        .tech-rings::before {
+            width: 130px;
+            height: 130px;
+        }
+
+        .tech-rings::after {
+            width: 80px;
+            height: 80px;
+        }
+
+    .pulse-dot {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background-color: rgba(0, 255, 247, 0.3);
+        border-radius: 50%;
+        top: 40%;
+        left: 45%;
+        transform: translate(-50%, -50%);
+        animation: pulse 3s ease-in-out infinite;
+    }
+
+        .pulse-dot::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 15px;
+            height: 15px;
+            background-color: #00fff7;
+            border-radius: 50%;
+        }
+
+    .graph-lines {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: linear-gradient(rgba(0, 255, 247, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 247, 0.03) 1px, transparent 1px);
+        background-size: 30px 30px;
+        z-index: -1;
+        opacity: 0.5;
+    }
+
+    /* JavaScript Functionality CSS */
+    .service-detail-section {
+        transition: opacity 0.5s ease;
+        opacity: 0;
+        height: 0;
+        overflow: hidden;
+    }
+
+        .service-detail-section.active-service {
+            opacity: 1;
+            height: auto;
+            overflow: visible;
+        }
+
+    /* Responsive Styles */
+    @@media (max-width: 1200px) {
+        .hero-title {
+            font-size: 3.5rem;
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .service-detail {
+            flex-direction: column;
+        }
+
+        .service-content {
+            padding-right: 0;
+            margin-bottom: 40px;
+            width: 100%;
+        }
+
+        .service-visual {
+            width: 100%;
+        }
+
+        .cta-container {
+            flex-direction: column;
+            padding: 40px 30px;
+        }
+
+        .cta-content {
+            padding-right: 0;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .cta-decoration {
+            height: 150px;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .service-nav {
+            flex-wrap: wrap;
+        }
+
+        .service-nav-item {
+            flex: 1 0 45%;
+            margin-bottom: 10px;
+        }
+
+        .timeline-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .timeline-number {
+            margin-bottom: 15px;
+        }
+
+        .timeline-connector {
+            left: 30px;
+            top: 60px;
+            height: calc(100% - 20px);
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .container {
+            padding: 0 20px;
+        }
+
+        .service-nav-item {
+            flex: 1 0 100%;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+        }
+
+        .cta-title {
+            font-size: 1.5rem;
+        }
+
+        .cta-text {
+            font-size: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+        }
+
+        .service-title {
+            font-size: 1.6rem;
+        }
+
+        .step-title {
+            font-size: 1.2rem;
+        }
+    }
+
+    /* Additional Animations */
+    @@keyframes floatAnimation {
+        0% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+
+        100% {
+            transform: translateY(0);
+        }
+    }
+
+    .service-visual .visual-container {
+        animation: floatAnimation 8s ease-in-out infinite;
+    }
+</style>

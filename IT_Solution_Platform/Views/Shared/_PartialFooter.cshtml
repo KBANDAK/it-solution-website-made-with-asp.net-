@@ -1,0 +1,124 @@
+﻿<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-left">
+            <img src="~/Content/Images/Logo_SecuDev.png" alt="SecuDev Logo" class="footer-logo" />
+        </div>
+
+        <!-- Center: Navigation Links -->
+        <nav class="footer-center nav-links">
+            <a href="@Url.Action("Index", "Home")" class="nav-link-ft">Home</a>
+            <a href="@Url.Action("About", "Home")" class="nav-link-ft">About</a>
+            <a href="@Url.Action("Services", "Home")" class="nav-link-ft">Services</a>
+            <a href="@Url.Action("Contact", "Home")" class="nav-link-ft">Contact</a>
+            <a href="@Url.Action("PrivacyPolicy", "Home")" class="nav-link-ft">Privacy Policy</a>
+        </nav>
+
+        <div class="footer-right">
+            <a href="https://www.instagram.com" target="_blank" class="social-icon">
+                <img src="~/Content/Images/Icons/instagram.png" alt="Instagram" />
+            </a>
+            <a href="https://www.linkedin.com" target="_blank" class="social-icon">
+                <img src="~/Content/Images/Icons/linkedin.png" alt="LinkedIn" />
+            </a>
+        </div>
+    </div>
+</footer>
+
+<style>
+    .footer {
+        position: relative;
+        width: 100%;
+        height: 100px;
+        padding: 40px 20px;
+        background-color: #0d1117; /* Matches .what-we-do-section */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .footer-content {
+        width: 100%;
+        max-width: 1440px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        gap: 50px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .section-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+    }
+
+    .tech-grid {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: linear-gradient(rgba(0, 255, 247, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 247, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        z-index: 1;
+    }
+
+    .glow-circle {
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(0, 255, 247, 0.1) 0%, rgba(13, 17, 23, 0) 70%);
+        bottom: -250px;
+        right: -100px; /* Matches .what-we-do-section */
+        z-index: 1;
+    }
+
+    .footer-logo {
+        height: 70px;
+        width: auto;
+        z-index: 2;
+    }
+
+    .footer-center {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        z-index: 2;
+    }
+
+    .footer-right {
+        display: flex;
+        gap: 20px;
+        z-index: 2;
+    }
+
+    .nav-link-ft {
+        color: #cbd5e1;
+        text-decoration: none;
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 14px;
+        transition: color 0.3s ease;
+    }
+
+        .nav-link-ft:hover {
+            color: #00FFF7;
+        }
+
+    .social-icon img {
+        width: 24px;
+        height: 24px;
+        transition: transform 0.3s ease, filter 0.3s ease;
+    }
+
+    .social-icon:hover img {
+        transform: scale(1.2);
+        filter: drop-shadow(0 0 5px #00FFF7);
+    }
+</style>
