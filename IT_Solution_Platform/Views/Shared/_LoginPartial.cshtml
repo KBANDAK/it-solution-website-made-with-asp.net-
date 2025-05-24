@@ -1,22 +1,68 @@
-﻿
-@if (Request.IsAuthenticated)
+﻿@if (Request.IsAuthenticated)
 {
-    using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+    using (Html.BeginForm("LogOff", "Account", FormMethod.Get, new { id = "logoutForm", @class = "navbar-right" }))
     {
         @Html.AntiForgeryToken()
 
-        var lastName = Session["LastName"] as string ?? "User";
-        <ul class="navbar-nav navbar-right">
-            <li>
-                @Html.ActionLink("Hello " + lastName + "!", "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage", @class = "nav-link" })
+        var fullName = Session["Fullname"] as string ?? "User";
+        <ul class="navbar-nav navbar-right d-flex flex-row align-items-center">
+            <li class="nav-item">
+                @Html.ActionLink("Hello " + HttpUtility.HtmlEncode(fullName) + "!", "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage", @class = "nav-link" })
+                <span class="nav-link separator"> - </span>
+                <input type="submit" class="nav-link nav-link-submit" value="Log off" />
             </li>
-            <li><a class="nav-link" href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
         </ul>
     }
 }
 else
 {
     <ul class="navbar-nav navbar-right">
-        <li>@Html.ActionLink("Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class = "nav-link" })</li>
+        <li class="nav-item">@Html.ActionLink("Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class = "nav-link" })</li>
     </ul>
 }
+
+<style>
+    .navbar-nav.d-flex {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .navbar-nav .nav-item {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .navbar-nav .nav-link {
+        padding: 0 6px;
+        display: inline-block;
+        color: #fff; /* Match your theme */
+        text-decoration: none;
+    }
+
+        .navbar-nav .nav-link:hover {
+            text-decoration: underline;
+        }
+
+    .navbar-nav .separator {
+        color: #fff; /* Match your theme */
+        padding: 0 6px;
+    }
+
+    .navbar-nav .nav-link-submit {
+        background: none;
+        border: none;
+        padding: 0 6px;
+        color: #fff; /* Match your theme */
+        font: inherit; /* Inherit font from parent */
+        cursor: pointer;
+        display: inline-block;
+        text-decoration: none;
+        appearance: none; /* Remove browser-specific styling */
+        -webkit-appearance: none;
+        -moz-appearance: none;
+    }
+
+        .navbar-nav .nav-link-submit:hover {
+            text-decoration: underline;
+        }
+</style>

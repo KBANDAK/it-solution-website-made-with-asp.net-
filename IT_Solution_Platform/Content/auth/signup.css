@@ -1,0 +1,441 @@
+﻿/* Variables (same as contact page) */
+:root {
+    /* Core Colors */
+    --primary-color: #00e5ff;
+    --primary-dim: #00bbff;
+    --accent-color: #ff00e5;
+    --dark-bg: #080c14;
+    --card-bg: #0d121d;
+    --card-hover: #111625;
+    /* Text Colors */
+    --text-bright: rgba(255, 255, 255, 0.95);
+    --text-primary: rgba(255, 255, 255, 0.85);
+    --text-secondary: rgba(255, 255, 255, 0.65);
+    /* UI Elements */
+    --border-light: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(0, 229, 255, 0.3);
+    --glass-bg: rgba(13, 18, 29, 0.7);
+    /* Glows */
+    --primary-glow: rgba(0, 229, 255, 0.2);
+    --accent-glow: rgba(255, 0, 229, 0.15);
+    /* Shadows */
+    --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    --hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+    /* Animations */
+    --transition-fast: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --transition-long: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Login Page Base Styles */
+.signup-page {
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--dark-bg);
+}
+
+.signup-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    position: relative;
+    z-index: 5;
+    padding: 2rem;
+}
+
+.signup-wrapper {
+    width: 85%; /* Use 90% of the viewport width */
+    max-width: 600px;
+    z-index: 10;
+}
+
+.signup-form {
+    background-color: var(--glass-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 20px;
+    padding: 2.5rem;
+    backdrop-filter: blur(15px);
+    box-shadow: var(--box-shadow);
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+    .signup-form:hover {
+        box-shadow: var(--hover-shadow);
+        transform: translateY(-5px);
+        border-color: rgba(0, 229, 255, 0.15);
+    }
+
+    .signup-form:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-dim));
+        opacity: 0.5;
+    }
+
+.form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+    .form-header h3 {
+        font-size: 2rem;
+        margin: 0 0 0.75rem 0;
+        color: var(--text-bright);
+        font-weight: 700;
+    }
+
+    .form-header p {
+        margin: 0;
+        color: var(--text-secondary);
+    }
+
+/* Form Fields */
+.form-field {
+    width: 100%;
+    position: relative;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1.25rem;
+    top: 1.1rem;
+    width: 18px;
+    height: 18px;
+    color: var(--primary-color);
+    opacity: 0.7;
+    transition: var(--transition-fast);
+    z-index: 2;
+}
+
+.form-input {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 1rem 1rem 1rem 3rem; /* Reduce left padding */
+    color: var(--text-bright);
+    font-size: 1rem;
+    transition: var(--transition-fast);
+    box-sizing: border-box; /* Ensure padding doesn't affect width */
+    overflow: visible; /* Ensure text isn't clipped */
+}
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--border-hover);
+        background-color: rgba(0, 229, 255, 0.05);
+    }
+
+.focus-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    height: 2px;
+    width: 94%;
+    background: var(--primary-color);
+    transition: var(--transition-fast);
+    border-radius: 2px;
+}
+
+.form-input:focus ~ .focus-indicator {
+    transform: translateX(-50%) scaleX(1);
+}
+
+.form-field:focus-within .input-icon {
+    opacity: 1;
+    transform: scale(1.1);
+}
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-dim));
+    border: none;
+    border-radius: 12px;
+    color: #0a0e17;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: all 0.8s ease;
+    }
+
+.btn-icon {
+    width: 18px;
+    height: 18px;
+    transition: var(--transition);
+    opacity: 0.8;
+}
+
+.submit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 229, 255, 0.4);
+}
+
+    .submit-btn:hover::before {
+        left: 100%;
+    }
+
+    .submit-btn:hover .btn-icon {
+        transform: translateX(3px);
+        opacity: 1;
+    }
+
+.submit-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
+}
+
+/* Form Footer */
+.form-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.register-link,
+.forgot-password-link {
+    color: var(--primary-color);
+    transition: var(--transition-fast);
+}
+
+    .register-link:hover,
+    .forgot-password-link:hover {
+        color: var(--primary-dim);
+        text-decoration: underline;
+    }
+
+/* Validation Summary */
+.validation-summary {
+    color: #ff4136;
+    margin-bottom: 1rem;
+    background-color: rgba(255, 65, 54, 0.1);
+    border: 1px solid rgba(255, 65, 54, 0.2);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .login-form {
+        padding: 2rem;
+    }
+
+    .form-header h3 {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-form {
+        padding: 1.5rem;
+    }
+
+    .form-header h3 {
+        font-size: 1.6rem;
+    }
+}
+
+/* Background Elements */
+.bg-elements {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.grid-plane {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background-image: linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+    background-size: 30px 30px;
+    transform: perspective(1000px) rotateX(60deg);
+    animation: gridMove 30s linear infinite;
+    opacity: 0.7;
+}
+
+@keyframes gridMove {
+    0% {
+        transform: perspective(1000px) rotateX(60deg) translateY(0);
+    }
+
+    100% {
+        transform: perspective(1000px) rotateX(60deg) translateY(30px);
+    }
+}
+
+.glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.4;
+    animation: pulse 15s ease-in-out infinite alternate;
+}
+
+.glow-primary {
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, var(--primary-glow) 0%, rgba(0, 229, 255, 0) 70%);
+    bottom: -300px;
+    right: -200px;
+}
+
+.glow-accent {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, var(--accent-glow) 0%, rgba(255, 0, 229, 0) 70%);
+    top: -200px;
+    left: -100px;
+    animation-delay: 2s;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
+}
+
+/* Tech Rings */
+.tech-rings {
+    position: absolute;
+    top: 50%;
+    right: 10%;
+    transform: translate(0, -50%);
+    z-index: 2;
+}
+
+.ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 255, 247, 0.2);
+    transform: translate(-50%, -50%);
+}
+
+.ring-outer {
+    width: 300px;
+    height: 300px;
+    top: 50%;
+    left: 50%;
+    animation: spin 20s linear infinite;
+}
+
+.ring-middle {
+    width: 200px;
+    height: 200px;
+    top: 50%;
+    left: 50%;
+    animation: spin 15s linear infinite reverse;
+}
+
+.ring-inner {
+    width: 100px;
+    height: 100px;
+    top: 50%;
+    left: 50%;
+    animation: spin 10s linear infinite;
+}
+
+.pulse-dot {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: rgba(0, 255, 247, 0.3);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse-dot 3s ease-in-out infinite;
+}
+
+    .pulse-dot::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 15px;
+        height: 15px;
+        background-color: var(--primary-color);
+        border-radius: 50%;
+        box-shadow: 0 0 15px var(--primary-color);
+    }
+
+@keyframes pulse-dot {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Particles */
+.particles-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}

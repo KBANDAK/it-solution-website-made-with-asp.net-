@@ -1,0 +1,148 @@
+﻿@model IT_Solution_Platform.Models.SignUpViewModel
+@{
+    ViewBag.Title = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="signup-page">
+    <!--Background elements -->
+    <div class="bg-elements">
+        <div class="grid-plane"></div>
+        <div class="glow glow-primary"></div>
+        <div class="glow glow-accent"></div>
+        <div class="tech-rings">
+            <div class="ring ring-outer"></div>
+            <div class="ring ring-middle"></div>
+            <div class="ring ring-inner"></div>
+            <div class="pulse-dot"></div>
+        </div>
+        <div class="particles-container" id="particles-js"></div>
+    </div>
+
+    <!--SignUp Content -->
+    <div class="container">
+        <div class="signup-section">
+            <div class="signup-wrapper" data-aos="fade-up" data-aos-delay="400">
+                <div class="signup-form">
+                    <div class="form-header">
+                        <h3>Empowering Your Digital Security</h3>
+                        <p>Get started with us today!</p>
+                    </div>
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success" role="alert">
+                            @TempData["SuccessMessage"]
+                        </div>
+                    }
+                    @if (TempData["InfoMessage"] != null)
+                    {
+                        <div class="alert alert-info" role="alert">
+                            @TempData["InfoMessage"]
+                        </div>
+                    }
+
+                    @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { role = "form", @class = "needs-validation", novalidate = true }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                        <div class="form-field">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            @Html.TextBoxFor(m => m.Email, new { @class = "form-input", placeholder = "Email Address", required = "required" })
+                            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                            <div class="focus-indicator"></div>
+                        </div>
+
+                        <div class="form-field">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            @Html.TextBoxFor(m => m.FirstName, new { @class = "form-input", placeholder = "First Name", required = "required" })
+                            @Html.ValidationMessageFor(m => m.FirstName, "", new { @class = "text-danger" })
+                            <div class="focus-indicator"></div>
+                        </div>
+
+                        <div class="form-field">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            @Html.TextBoxFor(m => m.LastName, new { @class = "form-input", placeholder = "Last Name", required = "required" })
+                            @Html.ValidationMessageFor(m => m.LastName, "", new { @class = "text-danger" })
+                            <div class="focus-indicator"></div>
+                        </div>
+
+                        <div class="form-field">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "form-input", placeholder = "Phone Number", required = "required" })
+                            @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger" })
+                            <div class="focus-indicator"></div>
+                        </div>
+
+                        <div class="form-field">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            @Html.PasswordFor(m => m.Password, new { @class = "form-input", placeholder = "Password", required = "required" })
+                            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                            <div class="focus-indicator"></div>
+                        </div>
+
+                        <div class="form-field">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-input", placeholder = "Confirm Password", required = "required" })
+                            @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger" })
+                            <div class="focus-indicator"></div>
+                        </div>
+
+                        <button type="submit" class="submit-btn">
+                            <span class="btn-text">Sign Up</span>
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                            <span class="loading-spinner"></span>
+                        </button>
+
+                        <div class="form-footer">
+                            <p>Already Have an Account? @Html.ActionLink("Login", "Login", "Account", null, new { @class = "login-link" })</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        // Bootstrap form validation
+        (function () {
+            'use strict';
+            window.addEventListener('load', function () {
+                var forms = document.getElementsByClassName('needs-validation');
+                Array.prototype.filter.call(forms, function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+}

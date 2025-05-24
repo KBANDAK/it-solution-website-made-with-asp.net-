@@ -24,6 +24,8 @@ namespace IT_Solution_Platform
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                     "~/Content/bootstrap.css",
+                    "~/Content/auth/login.css",
+                    "~/Content/auth/signup.css",
                     "~/Content/site.css"));
 
             // JS bundle for application scripts

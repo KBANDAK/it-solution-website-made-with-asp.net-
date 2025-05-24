@@ -9,11 +9,15 @@ namespace IT_Solution_Platform.Controllers
     public class HomeController : Controller
     {
         // This home page
+        [HttpGet]
+        [AllowAnonymous]
         public ActionResult Index()
         {
             return View();
         }
 
+        [HttpGet]
+        [AllowAnonymous]
         public ActionResult Services()
         {
             ViewBag.Message = "Your services page.";
@@ -21,6 +25,8 @@ namespace IT_Solution_Platform.Controllers
             return View();
         }
 
+        [HttpGet]
+        [AllowAnonymous]
         public ActionResult About()
         {
             ViewBag.Message = "Your application description page.";
@@ -28,10 +34,19 @@ namespace IT_Solution_Platform.Controllers
             return View();
         }
 
+        [HttpGet]
+        [AllowAnonymous]
         public ActionResult Contact()
         {
             ViewBag.Message = "Your contact page.";
 
+            return View();
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult PrivacyPolicy() 
+        {
             return View();
         }
     }
