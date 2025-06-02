@@ -1,7 +1,7 @@
 ﻿using System.Web;
 using System.Web.Mvc;
-using IT_Solution_Platform.Filters;
 using IT_Solution_Platform.Services;
+using Supabase;
 
 namespace IT_Solution_Platform
 {
@@ -10,10 +10,6 @@ namespace IT_Solution_Platform
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
             filters.Add(new HandleErrorAttribute());
-            filters.Add(new JwtAuthenticationFilter(
-                DependencyResolver.Current.GetService<SupabaseAuthService>(),
-                DependencyResolver.Current.GetService<SupabaseDatabase>()) // Added to fetch user details
-            );
         }
     }
 }

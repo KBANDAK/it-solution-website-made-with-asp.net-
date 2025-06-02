@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Security.Policy;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Security;
+using Microsoft.Owin; // Add this
 using System.Windows.Forms.VisualStyles;
 using IT_Solution_Platform.Models;
 using Newtonsoft.Json;
 using Supabase.Gotrue;
 using static System.Net.WebRequestMethods;
+using Microsoft.Owin.Security;
 
 namespace IT_Solution_Platform.Services
 {
@@ -18,7 +21,7 @@ namespace IT_Solution_Platform.Services
     /// Handles authentication operations with Supabase, including user sign-up, sign-in, and email confirmation.
     /// Integrates with the users table and logs suspicious activities.
     /// </summary>
-    public class SupabaseAuthService : IAuthService
+    public class SupabaseAuthService
     {
         private readonly Supabase.Client _supabaseClient;
         private readonly SupabaseDatabase _database;
@@ -30,7 +33,7 @@ namespace IT_Solution_Platform.Services
         /// </summary>
         public SupabaseAuthService()
         {
-            _supabaseClient = new Supabase.Client(SupabaseConfig.SupabaseUrl, SupabaseConfig.SupabaseAnonKey);
+            _supabaseClient = SupabaseConfig.GetAnonClient(); // Use the anonymous client for user sign-up and sign-in
             _database = new SupabaseDatabase();
             _auditLog = new AuditLogService(_database);
         }
@@ -52,7 +55,7 @@ namespace IT_Solution_Platform.Services
                 if (string.IsNullOrWhiteSpace(lastName))
                     return (null, "Last name is required.");
 
-                
+
 
                 var session = await _supabaseClient.Auth.SignUp(email, password, options);
 
@@ -75,7 +78,7 @@ namespace IT_Solution_Platform.Services
                 // Get default role (e.g., role_id = 1 for normal users
                 var roles = _database.ExecuteQuery<Role>("SELECT * FROM roles where role_id = @role_id", new { role_id = 1 });
                 var defaultRole = roles.FirstOrDefault();
-                if (defaultRole == null) 
+                if (defaultRole == null)
                 {
                     _auditLog.LogAudit(0, "Registration Failure", "User", null, new { Email = email, Error = "Default role not found" }, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
                     return (null, "Registration failed. Default role not found.");
@@ -85,14 +88,14 @@ namespace IT_Solution_Platform.Services
                 var supabaseUid = Guid.TryParse(session.User.Id, out var uid) ? uid : throw new Exception("Invalid Supabase UID");
                 var user = new Models.User
                 {
-                    Email = email,
-                    FirstName = firstName,
-                    LastName = lastName,
-                    PhoneNumber = phoneNumber,
-                    IsActive = accessToken != null, // Active only if no email confirmation is required
-                    SupabaseUid = supabaseUid,
-                    RoleId = defaultRole.role_id,
-                    PasswordHash = "supabase_managed",
+                    email = email,
+                    first_name = firstName,
+                    last_name = lastName,
+                    phone_number = phoneNumber,
+                    is_active = accessToken != null, // Active only if no email confirmation is required
+                    supabase_uid = supabaseUid,
+                    role_id = defaultRole.role_id,
+                    password_hash = "supabase_managed",
                 };
 
                 var insertQuery = @"INSERT INTO users (email, first_name, last_name, phone_number, is_active, supabase_uid, role_id, password_hash)
@@ -101,7 +104,7 @@ namespace IT_Solution_Platform.Services
                 var insertResult = _database.ExecuteNonQuery(insertQuery, user);
                 if (insertResult <= 0)
                 {
-                    _auditLog.LogAudit(0, "Registration failed", lastName, null, new { Email = email, Error= "Insertion in users table error." }, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
+                    _auditLog.LogAudit(0, "Registration failed", lastName, null, new { Email = email, Error = "Insertion in users table error." }, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
 
                     // Clean up supabase base user if database insertion fails
                     try
@@ -110,7 +113,7 @@ namespace IT_Solution_Platform.Services
                         await _supabaseClient.AdminAuth(SupabaseConfig.SupabaseServiceKey).DeleteUser(session.User.Id);
                     }
                     catch (Exception cleanUpEx)
-                    { 
+                    {
                         _auditLog.LogAudit(0, "Registration failed", lastName, null, new { Email = email, Error = cleanUpEx.Message }, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
                     }
 
@@ -158,7 +161,7 @@ namespace IT_Solution_Platform.Services
 
                 return (null, "Invalid email or password");
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return (null, $"Authentication failed: {ex.Message}");
             }
@@ -286,14 +289,14 @@ namespace IT_Solution_Platform.Services
 
         public async Task<Supabase.Gotrue.User> GetUserByIdAsync(string userId)
         {
-            try 
+            try
             {
                 if (string.IsNullOrEmpty(userId))
                 {
                     throw new ArgumentException("User ID cannot be null or empty.");
                 }
 
-                var adminClient = new Supabase.Client(SupabaseConfig.SupabaseUrl, SupabaseConfig.SupabaseServiceKey);
+                var adminClient = SupabaseConfig.GetServiceClient();
                 var user = await adminClient.AdminAuth(SupabaseConfig.SupabaseServiceKey).GetUserById(userId);
                 if (user == null)
                 {
@@ -309,16 +312,108 @@ namespace IT_Solution_Platform.Services
             }
         }
 
-        public Task<bool> SignOutAsync()
+        public async Task<Session> RefreshTokenAsync(string refreshToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var response = await _supabaseClient.Auth.RefreshSession();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _auditLog.LogAudit(0, "Token Refresh Failed", "User", null, new { Error = ex.Message }, HttpContext.Current?.Request.UserHostAddress ?? "Unknown", HttpContext.Current?.Request.UserAgent ?? "Unknown");
+                throw new ApplicationException($"Token refresh failed: {ex.Message}", ex);
+            }
         }
 
-        public Task<(string AccessToken, string Message)> RefreshTokenAsync(string refreshToken)
+
+        // Sign In with user async - CORRECTED VERSION
+        public Task SignInUserAsync(Models.User user, string accessToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                // Create claims for a user
+                var claims = new[]
+                {
+                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                     new Claim(ClaimTypes.Name, user.email),
+                     new Claim(ClaimTypes.Email, user.email),
+                     new Claim("SupabaseUserId", user.supabase_uid.ToString()),
+                     new Claim("FirstName", user.first_name ?? ""),
+                     new Claim("LastName", user.last_name ?? ""),
+                     new Claim("AccessToken", accessToken ?? ""),
+                     new Claim("RoleId", user.role_id.ToString()),
+                     new Claim(ClaimTypes.Role, user.Role?.role_name ?? "") // Optional: Add role name
+                };
+
+                var identity = new ClaimsIdentity(claims, "ApplicationCookie");
+                var principal = new ClaimsPrincipal(identity);
+
+                // Sign in with OWIN
+                var authManager = HttpContext.Current.GetOwinContext().Authentication;
+                authManager.SignIn(new AuthenticationProperties
+                {
+                    IsPersistent = false,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(24)
+                }, identity);
+
+                // Also set FormsAuthentication cookie for compatibility
+                FormsAuthentication.SetAuthCookie(user.email, false);
+
+                // Explicitly set HttpContext.User to ensure claims are available
+                HttpContext.Current.User = principal;
+
+                return Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                _auditLog.LogAudit(user.user_id, "SignIn Failed", "Authentication", null,
+                    new { Error = ex.Message },
+                    HttpContext.Current?.Request.UserHostAddress ?? "Unknown",
+                    HttpContext.Current?.Request.UserAgent ?? "Unknown");
+                throw;
+            }
         }
 
+
+        // Sign out - CORRECTED VERSION
+        public async Task SignOutAsync()
+        {
+            try
+            {
+                // Sign out from Supabase
+                await _supabaseClient.Auth.SignOut();
+
+                // Sign out from OWIN
+                var authManager = HttpContext.Current.GetOwinContext().Authentication;
+                authManager.SignOut("ApplicationCookie");
+
+                // Clear Forms Authentication
+                FormsAuthentication.SignOut();
+
+                // Clear session
+                HttpContext.Current.Session.Clear();
+            }
+            catch (Exception ex)
+            {
+                // Even if Supabase signout fails, clear local auth
+                try
+                {
+                    var authManager = HttpContext.Current.GetOwinContext().Authentication;
+                    authManager.SignOut("ApplicationCookie");
+                    FormsAuthentication.SignOut();
+                    HttpContext.Current.Session.Clear();
+                }
+                catch
+                {
+                    // Fallback - just clear session and forms auth
+                    FormsAuthentication.SignOut();
+                    HttpContext.Current.Session.Clear();
+                }
+
+                throw new Exception($"Sign out failed: {ex.Message}", ex);
+            }
+        }
 
         private string ParseGoTrueError(string errorMessage)
         {

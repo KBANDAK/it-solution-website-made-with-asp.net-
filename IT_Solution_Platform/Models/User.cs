@@ -1,24 +1,28 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Principal;
 
 namespace IT_Solution_Platform.Models
 {
     /// <summary>
     /// Represents a user entity in the database, mapping to the public.users table.
     /// </summary>
-    public class User
+
+    public class User : IIdentity
     {
         /// <summary>
         /// The unique identifier for the user (auto-incremented).
         /// </summary>
         [Key]
-        public int UserId { get; set; }
+        [Column("user_id")]
+        public int user_id { get; set; }
 
         /// <summary>
         /// The role ID associated with the user (foreign key to roles table).
         /// </summary>
-        public int? RoleId { get; set; }
+        [Column("role_id")]
+        public int role_id { get; set; }
 
         /// <summary>
         /// The user's email address (unique).
@@ -26,84 +30,104 @@ namespace IT_Solution_Platform.Models
         [Required]
         [StringLength(255)]
         [EmailAddress]
-        public string Email { get; set; }
+        [Column("email")]
+        public string email { get; set; }
 
         /// <summary>
         /// The hashed password (managed by Supabase in this implementation).
         /// </summary>
         [Required]
         [StringLength(255)]
-        public string PasswordHash { get; set; }
+        [Column("password_hash")]
+        public string password_hash { get; set; }
 
         /// <summary>
         /// The user's first name.
         /// </summary>
         [Required]
         [StringLength(100)]
-        public string FirstName { get; set; }
+        [Column("first_name")]
+        public string first_name { get; set; }
 
         /// <summary>
         /// The user's last name.
         /// </summary>
         [Required]
         [StringLength(100)]
-        public string LastName { get; set; }
+        [Column("last_name")]
+        public string last_name { get; set; }
 
         /// <summary>
         /// The user's phone number (optional).
         /// </summary>
         [StringLength(20)]
         [Phone]
-        public string PhoneNumber { get; set; }
+        [Column("phone_number")]
+        public string phone_number { get; set; }
 
         /// <summary>
         /// The URL or path to the user's profile picture (optional).
         /// </summary>
         [StringLength(255)]
-        public string ProfilePicture { get; set; }
+        [Column("profile_picture")]
+        public string profile_picture { get; set; }
 
         /// <summary>
         /// Indicates whether the user account is active.
         /// </summary>
-        public bool? IsActive { get; set; } = true;
+        [Column("is_active")]
+        public bool is_active { get; set; } = true;
 
         /// <summary>
         /// The timestamp of the user's last login.
         /// </summary>
-        public DateTime? LastLogin { get; set; }
+        [Column("last_login")]
+        public DateTime? last_login { get; set; }
 
         /// <summary>
         /// The token used for password reset (optional).
         /// </summary>
         [StringLength(255)]
-        public string ResetToken { get; set; }
+        [Column("reset_token")]
+        public string reset_token { get; set; }
 
         /// <summary>
         /// The expiration timestamp for the password reset token.
         /// </summary>
-        public DateTime? ResetTokenExpires { get; set; }
+        [Column("reset_token_expires")]
+        public DateTime? reset_token_expires { get; set; }
 
         /// <summary>
         /// The timestamp when the user was created.
         /// </summary>
-        public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
+        [Column("created_at")]
+        public DateTime created_at { get; set; }
 
         /// <summary>
         /// The timestamp when the user was last updated.
         /// </summary>
-        public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;
+        [Column("updated_at")]
+        public DateTime updated_at { get; set; }
 
         /// <summary>
         /// The Supabase user ID (unique, links to Supabase auth).
         /// </summary>
         [StringLength(255)]
-        public Guid SupabaseUid { get; set; }
+        [Column("supabase_uid")]
+        public Guid supabase_uid { get; set; }
 
         // Navigation properties
         public Role Role { get; set; }
 
         // Computed properties
-        public string FullName => $"{FirstName} {LastName}".Trim();
-        public string Id => SupabaseUid.ToString(); // For compatibility with Identity extensions
+        public string FullNameS => $"{first_name} {last_name}".Trim();
+        public string Id => supabase_uid.ToString(); // For compatibility with Identity extensions
+
+        // IIdentity Implementation
+        public string AuthenticationType => "SupabaseAuth";
+        public bool IsAuthenticated => !string.IsNullOrEmpty(Id);
+        public String Name => email;
+
+        public String FullName => FullNameS;
     }
 }

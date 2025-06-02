@@ -1,5 +1,5 @@
 using System;
-
+using IT_Solution_Platform.Services;
 using Unity;
 
 namespace IT_Solution_Platform
@@ -42,6 +42,10 @@ namespace IT_Solution_Platform
 
             // TODO: Register your type's mappings here.
             // container.RegisterType<IProductRepository, ProductRepository>();
+
+            container.RegisterType<SupabaseAuthService>();
+            container.RegisterType<SupabaseDatabase>();
+
         }
     }
 }

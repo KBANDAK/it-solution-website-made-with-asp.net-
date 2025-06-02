@@ -1,0 +1,178 @@
+﻿@{
+    ViewBag.Title = "Request Submitted Successfully";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        body {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .success-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin: 4rem auto;
+            max-width: 600px;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .success-header {
+            background: linear-gradient(45deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+            padding: 3rem 2rem;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: bounce 2s infinite;
+        }
+
+        @@keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-30px);
+            }
+            60% {
+                transform: translateY(-15px);
+            }
+        }
+
+        .success-body {
+            padding: 2.5rem;
+        }
+
+        .request-id {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            display: inline-block;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 1rem 0;
+        }
+
+        .next-steps {
+            background: rgba(248, 249, 250, 0.8);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+        }
+
+        .btn-outline-primary {
+            border: 2px solid #4facfe;
+            color: #4facfe;
+            border-radius: 50px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+        }
+
+        .btn-outline-primary:hover {
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            border-color: transparent;
+            color: white;
+        }
+    </style>
+}
+
+<div class="container">
+    <div class="success-container">
+        <div class="success-header">
+            <div class="success-icon">
+                <i class="fa fa-check-circle"></i>
+            </div>
+            <h1>Request Submitted Successfully!</h1>
+            <p class="mb-0">Your penetration testing request has been received and is being processed.</p>
+        </div>
+
+        <div class="success-body">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success" role="alert">
+                    <i class="fa fa-info-circle me-2"></i>
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+            else
+            {
+                <div class="request-id">
+                    <i class="fa fa-ticket-alt me-2"></i>
+                    Request ID: PT-@DateTime.Now.ToString("yyyyMMdd")-001
+                </div>
+            }
+
+            <div class="next-steps">
+                <h4><i class="fa fa-tasks text-primary me-2"></i>What happens next?</h4>
+                <ul class="list-unstyled mt-3">
+                    <li class="mb-2">
+                        <i class="fa fa-clock text-success me-2"></i>
+                        <strong>Within 24 hours:</strong> Our security team will review your request
+                    </li>
+                    <li class="mb-2">
+                        <i class="fa fa-phone text-success me-2"></i>
+                        <strong>Within 48 hours:</strong> We'll contact you to discuss the scope and timeline
+                    </li>
+                    <li class="mb-2">
+                        <i class="fa fa-file-contract text-success me-2"></i>
+                        <strong>Within 3-5 days:</strong> We'll provide a detailed proposal and engagement agreement
+                    </li>
+                    <li class="mb-0">
+                        <i class="fa fa-shield-alt text-success me-2"></i>
+                        <strong>Upon approval:</strong> Testing will be scheduled according to your preferred dates
+                    </li>
+                </ul>
+            </div>
+
+            <div class="contact-info">
+                <h5>Need immediate assistance?</h5>
+                <p class="text-muted">
+                    Contact our security team at:
+                    <a href="mailto:security@company.com">security@company.com</a>
+                    or call <a href="tel:+1234567890">+(962) 79-509-5985</a>
+                </p>
+            </div>
+
+            <div class="action-buttons mt-4">
+                @Html.ActionLink("Submit Another Request", "PenTesting", "Service", null, new { @class = "btn btn-primary" })
+                @Html.ActionLink("Return to Dashboard", "Index", "Home", null, new { @class = "btn btn-outline-primary" })
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-hide success message after 10 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 10000);
+        });
+    </script>
+}

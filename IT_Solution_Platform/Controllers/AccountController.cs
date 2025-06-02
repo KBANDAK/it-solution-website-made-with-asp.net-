@@ -1,18 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
-using System.Web.Services.Description;
+using System.Web.Services;
 using IT_Solution_Platform.Models;
 using IT_Solution_Platform.Services;
-using Microsoft.Extensions.Logging;
 using Supabase.Gotrue;
-using Supabase.Interfaces;
 
 namespace IT_Solution_Platform.Controllers
 {
@@ -26,45 +21,37 @@ namespace IT_Solution_Platform.Controllers
     /// </summary>
     public class AccountController : Controller
     {
-        private readonly SupabaseAuthService _authService;
-        private readonly SupabaseDatabase _database;
         private readonly AuditLogService _auditLogService;
+        private readonly SupabaseAuthService _authService;
+        private readonly SupabaseDatabase _databaseService;
 
 
-        public AccountController(SupabaseAuthService authService, SupabaseDatabase database, AuditLogService auditLogService)
+
+        public AccountController(AuditLogService auditLogService)
+
         {
-            _authService = authService;
-            _database = database;
-            _auditLogService = auditLogService;
+            _auditLogService = auditLogService ?? throw new ArgumentNullException(nameof(auditLogService));
+            _authService = new SupabaseAuthService();
+            _databaseService = new SupabaseDatabase();
         }
 
-
-
-
-
-        #region Registeration
-        /// <summary>
-        /// Displays the user registration view with pre-populated model data if needed.
-        /// </summary>
-        /// <returns>The registration view</returns>
+        #region Registration
         [HttpGet]
-        [AllowAnonymous] // Explicitly allow unauthenticated access
-        [OutputCache(Duration = 0, NoStore = true)] // Prevent caching for sensitive pages
+        [AllowAnonymous]
+        [OutputCache(Duration = 0, NoStore = true)]
         public ActionResult Register()
         {
+
             return View();
         }
 
-        /// <summary>
-        /// Register the user with the provided details. if successful sends an email to verify, then redirects to the verification page.
-        /// </summary>
-        /// <returns>The Verification Page</returns>
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        [OutputCache(Duration = 0, NoStore = true)] // Prevent caching for sensitive pages
+        [OutputCache(Duration = 0, NoStore = true)]
         public async Task<ActionResult> Register(SignUpViewModel model)
         {
+
             if (!ModelState.IsValid)
             {
                 _auditLogService.LogAudit(0, "Registration Attempt", "User", null, new { Email = model.Email, Error = "Invalid ModelState" }, Request.UserHostAddress, Request.UserAgent);
@@ -73,8 +60,8 @@ namespace IT_Solution_Platform.Controllers
 
             try
             {
-                // Check if user already exists in our database
-                var existingUser = _database.ExecuteQuery<Models.User>("SELECT * FROM users WHERE email = @Email", new { Email = model.Email }).FirstOrDefault();
+                // Check if user already exists
+                var existingUser = _databaseService.ExecuteQuery<Models.User>("SELECT * FROM users WHERE email = @Email", new { Email = model.Email }).FirstOrDefault();
                 if (existingUser != null)
                 {
                     _auditLogService.LogAudit(0, "Registration Attempt", "User", null, new { Email = model.Email, Error = "User already exists" }, Request.UserHostAddress, Request.UserAgent);
@@ -82,52 +69,55 @@ namespace IT_Solution_Platform.Controllers
                     return View(model);
                 }
 
-                // This will work inside a Controller
                 var redirectUrl = Url.Action("Verify", "Account", null, Request.Url.Scheme);
-                var options = new SignUpOptions
-                {
-                    RedirectTo = redirectUrl
-                };
+                var options = new SignUpOptions { RedirectTo = redirectUrl };
 
-                // Register user with Supabase auth
-                var (accessToken, message) = await _authService
-                    .SignUpAsync(
-                        model.Email,
-                        model.Password,
-                        model.FirstName,
-                        model.LastName,
-                        model.PhoneNumber,
-                        options
-                    );
+                // Register user with Supabase
+                var (accessToken, message) = await _authService.SignUpAsync(
+                    model.Email,
+                    model.Password,
+                    model.FirstName,
+                    model.LastName,
+                    model.PhoneNumber,
+                    options
+                );
 
-               
-
-                // Store email and message for verification page
                 ViewBag.Email = model.Email;
                 ViewBag.Message = message;
+                TempData["Email"] = model.Email;
+                TempData["SuccessMessage"] = message;
 
 
-                return RedirectToAction("verify");
+
+                // If access token is provided, user might be auto-verified
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    var supabaseUser = await _authService.GetUserByTokenAsync(accessToken);
+                    if (supabaseUser != null)
+                    {
+                        var dbUser = _databaseService.ExecuteQuery<Models.User>(
+                            "SELECT * FROM users WHERE supabase_uid = CAST(@SupabaseUid AS uuid)",
+                            new { SupabaseUid = supabaseUser.Id }).FirstOrDefault();
+
+                        if (dbUser != null && (bool)dbUser.is_active)
+                        {
+                            return RedirectToAction("Index", "Home");
+                        }
+                    }
+                }
+
+                return RedirectToAction("Verify");
             }
             catch (Exception ex)
             {
-
                 _auditLogService.LogAudit(0, "Registration Error", "User", null, new { Email = model.Email, Error = ex.Message }, Request.UserHostAddress, Request.UserAgent);
                 ModelState.AddModelError("", "An unexpected error occurred during registration. Please try again later.");
                 return View(model);
-
             }
         }
         #endregion
 
         #region Verification
-
-        /// <summary>
-        /// Handles email verification for user registration. Processes Supabase confirmation links and displays the verification page.
-        /// </summary>
-        /// <param name="access_token">The Supabase access token from the confirmation link.</param>
-        /// <param name="type">The type of verification (e.g., 'signup' for email confirmation).</param>
-        /// <returns>The Verification view or a redirect to the dashboard after successful verification.</returns>
         [HttpGet]
         [AllowAnonymous]
         [ActionName("verify")]
@@ -135,8 +125,6 @@ namespace IT_Solution_Platform.Controllers
         {
             try
             {
-
-                // Handle error case from Supabase
                 if (!string.IsNullOrEmpty(error))
                 {
                     _auditLogService.LogAudit(0, "Verification Error", "User", null, new { Error = error, ErrorCode = error_code, ErrorDescription = error_description }, Request.UserHostAddress, Request.UserAgent);
@@ -146,9 +134,7 @@ namespace IT_Solution_Platform.Controllers
 
                 if (!string.IsNullOrEmpty(access_token) && type == "signup")
                 {
-                    // Verify the access token with Supabase
                     var supabaseUser = await _authService.GetUserByTokenAsync(access_token);
-
                     if (supabaseUser == null)
                     {
                         _auditLogService.LogAudit(0, "Verification Failure", "User", null, new { Error = "Invalid or expired access token" }, Request.UserHostAddress, Request.UserAgent);
@@ -156,8 +142,7 @@ namespace IT_Solution_Platform.Controllers
                         return View("Verification");
                     }
 
-                    // Check if user exists in the database
-                    var dbUser = _database.ExecuteQuery<Models.User>("SELECT * FROM users WHERE supabase_uid = CAST(@SupabaseUid AS uuid)", new { SupabaseUid = supabaseUser.Id }).FirstOrDefault();
+                    var dbUser = _databaseService.ExecuteQuery<Models.User>("SELECT * FROM users WHERE supabase_uid = CAST(@SupabaseUid AS uuid)", new { SupabaseUid = supabaseUser.Id }).FirstOrDefault();
                     if (dbUser == null)
                     {
                         _auditLogService.LogAudit(0, "Verification Failure", "User", null, new { Email = supabaseUser.Email, Error = "User not found in database" }, Request.UserHostAddress, Request.UserAgent);
@@ -165,11 +150,10 @@ namespace IT_Solution_Platform.Controllers
                         return View("Verification");
                     }
 
-                    // Update user as active in the database
-                    if ((bool)!dbUser.IsActive)
+                    if ((bool)!dbUser.is_active)
                     {
                         var updateQuery = "UPDATE users SET is_active = @IsActive, updated_at = @UpdatedAt WHERE supabase_uid = CAST(@SupabaseUid AS uuid)";
-                        var updateResult = _database.ExecuteNonQuery(updateQuery, new
+                        var updateResult = _databaseService.ExecuteNonQuery(updateQuery, new
                         {
                             IsActive = true,
                             UpdatedAt = DateTime.UtcNow,
@@ -182,48 +166,27 @@ namespace IT_Solution_Platform.Controllers
                             ViewBag.Message = "Verification failed due to a server error. Please try again later.";
                             return View("Verification");
                         }
+
+                        // Refresh user data after update
+                        dbUser.is_active = true;
+                        dbUser.updated_at = DateTime.UtcNow;
                     }
-                    // Store token securely in cookie
-                    var cookie = new HttpCookie("access_token", access_token)
-                    {
-                        HttpOnly = true,
-                        Secure = true,
-                        SameSite = SameSiteMode.Strict,
-                        Expires = DateTime.UtcNow.AddHours(1)
-                    };
-
-                    Session.Add("Fullname", dbUser.FullName);
-                    Response.Cookies.Add(cookie);
-
-                    // Log successful verification
                     _auditLogService.LogAudit(0, "Verification Success", "User", null, new { Email = supabaseUser.Email, SupabaseUid = supabaseUser.Id }, Request.UserHostAddress, Request.UserAgent);
-
-
-                    // Redirect to home or dashboard
                     return RedirectToAction("Index", "Home");
-
                 }
+
                 ViewBag.Email = TempData["Email"] ?? string.Empty;
-                ViewBag.Message = TempData["SuccessMessage"] ?? "Please check your email for a confirmation link."; 
+                ViewBag.Message = TempData["SuccessMessage"] ?? "Please check your email for a confirmation link.";
                 return View("Verification");
             }
             catch (Exception ex)
             {
-
                 _auditLogService.LogAudit(0, "Verification Error", "User", null, new { Error = ex.Message }, Request.UserHostAddress, Request.UserAgent);
                 ViewBag.Message = "An error occurred during verification. Please try again or request a new confirmation email.";
                 return View("Verification");
-
             }
-
-
         }
 
-        /// <summary>
-        /// Checks if the user’s email has been verified.
-        /// </summary>
-        /// <param name="email">The user’s email address.</param>
-        /// <returns>JSON indicating verification status.</returns>
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult> CheckVerificationStatus(string email)
@@ -235,37 +198,16 @@ namespace IT_Solution_Platform.Controllers
                     return Json(new { isVerified = false, error = "Email is required" }, JsonRequestBehavior.AllowGet);
                 }
 
-                // Check database for user status
-                var dbUser = _database.ExecuteQuery<Models.User>("SELECT * FROM users WHERE email = @Email", new { Email = email }).FirstOrDefault();
+                var dbUser = _databaseService.ExecuteQuery<Models.User>("SELECT * FROM users WHERE email = @Email", new { Email = email }).FirstOrDefault();
                 if (dbUser == null)
                 {
                     _auditLogService.LogAudit(0, "Check Verification Failure", "User", null, new { Email = email, Error = "User not found" }, Request.UserHostAddress, Request.UserAgent);
                     return Json(new { isVerified = false, error = "User not found" }, JsonRequestBehavior.AllowGet);
                 }
 
-                // Optionally, verify with Supabase
-                var supabaseUser = await _authService.GetUserByIdAsync("1");
-                if (supabaseUser?.EmailConfirmedAt != null)
+                var supabaseUser = await _authService.GetUserByIdAsync(dbUser.supabase_uid.ToString());
+                if (supabaseUser?.EmailConfirmedAt != null && (bool)dbUser.is_active)
                 {
-                    // Update database if not already active
-                    if ((bool)!dbUser.IsActive)
-                    {
-                        var updateQuery = "UPDATE users SET is_active = @IsActive, updated_at = @UpdatedAt WHERE supabase_uid = @SupabaseUid";
-                        var updateResult = _database.ExecuteNonQuery(updateQuery, new
-                        {
-                            IsActive = true,
-                            UpdatedAt = DateTime.UtcNow,
-                            SupabaseUid = supabaseUser.Id
-                        });
-
-                        if (updateResult <= 0)
-                        {
-                            _auditLogService.LogAudit(0, "Check Verification Failure", "User", null, new { Email = email, Error = "Failed to update user status" }, Request.UserHostAddress, Request.UserAgent);
-                            return Json(new { isVerified = false, error = "Failed to update user status" }, JsonRequestBehavior.AllowGet);
-                        }
-                    }
-
-                    _auditLogService.LogAudit(0, "Check Verification Success", "User", null, new { Email = email, SupabaseUid = supabaseUser.Id }, Request.UserHostAddress, Request.UserAgent);
                     return Json(new { isVerified = true }, JsonRequestBehavior.AllowGet);
                 }
 
@@ -277,68 +219,60 @@ namespace IT_Solution_Platform.Controllers
                 return Json(new { isVerified = false, error = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
-
         #endregion
 
         #region Login
-        // GET: /Account/Login
         [HttpGet]
         [AllowAnonymous]
         public ActionResult Login(string returnUrl)
         {
+            // Redirect if already authenticated
             ViewBag.ReturnUrl = returnUrl;
+            if (returnUrl != null)
+            {
+                return RedirectToAction(returnUrl);
+            }
             return View();
         }
 
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Login(LoginViewModel model, string returnUrl) 
+        public async Task<ActionResult> Login(LoginViewModel model, string returnUrl)
         {
-            if (!ModelState.IsValid) 
+            if (!ModelState.IsValid)
             {
                 _auditLogService.LogAudit(0, "Login Validation Failure", "User", null, new { Email = model.Email, Error = "Invalid model state" }, Request.UserHostAddress, Request.UserAgent);
                 return View(model);
             }
 
-            try 
+            try
             {
-                // Authenticate with supabase
                 var authResponse = await _authService.SignInWithEmailAsync(model.Email, model.Password);
-
-                if (authResponse.Message == null || string.IsNullOrEmpty(authResponse.AccessToken))
+                if (string.IsNullOrEmpty(authResponse.AccessToken))
                 {
                     _auditLogService.LogAudit(0, "Login Failure", "User", null, new { Email = model.Email, Error = "Invalid email or password" }, Request.UserHostAddress, Request.UserAgent);
                     ModelState.AddModelError("", "Invalid email or password.");
                     return View(model);
                 }
-
-                // Fetch user details from the database
-                var dbUser = _database.ExecuteQuery<Models.User>("SELECT * FROM users WHERE email = @Email", new { Email = model.Email }).FirstOrDefault();
-                if (dbUser == null || (bool)!dbUser.IsActive)
+                var dbUser = _databaseService.ExecuteQuery<Models.User>("SELECT * FROM users WHERE email = @Email", new { Email = model.Email }).FirstOrDefault();
+                if (dbUser == null || (bool)!dbUser.is_active)
                 {
                     _auditLogService.LogAudit(0, "Login Failure", "User", null, new { Email = model.Email, Error = "User not found or inactive" }, Request.UserHostAddress, Request.UserAgent);
                     ModelState.AddModelError("", "Your account is not active or does not exist.");
                     return View(model);
                 }
 
-                // Set access_token cookie
-                var cookie = new HttpCookie("access_token", authResponse.AccessToken)
+                // Use BaseController's SetCookie and SetUserPrincipal
+                var setCookie = _authService.SignInUserAsync(dbUser, authResponse.AccessToken);
+                if (setCookie == null) 
                 {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = model.RememberMe ? DateTime.UtcNow.AddDays(7) : DateTime.UtcNow.AddHours(1)
-                };
-                Response.Cookies.Add(cookie);
+                    _auditLogService.LogAudit(0, "Login Failure", "User", null, new { Email = model.Email, Error = "Failed to set authentication cookie" }, Request.UserHostAddress, Request.UserAgent);
+                    ModelState.AddModelError("", "An error occurred while logging in. Please try again.");
+                    return View(model);
+                }
+                _auditLogService.LogAudit(0, "Login Success", "User", null, new { Email = model.Email, SupabaseUid = dbUser.supabase_uid }, Request.UserHostAddress, Request.UserAgent);
 
-                // Set Fullname in session
-                Session["Fullname"] = dbUser.FirstName ?? model.Email ?? "User";
-
-                // Log successful login
-                _auditLogService.LogAudit(0, "Login Success", "User", null, new { Email = model.Email, SupabaseUid = dbUser.SupabaseUid }, Request.UserHostAddress, Request.UserAgent);
-
-                // Redirect to returnUrl or home
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 {
                     return Redirect(returnUrl);
@@ -352,13 +286,9 @@ namespace IT_Solution_Platform.Controllers
                 return View(model);
             }
         }
-
         #endregion
 
-
         #region Forgot Password
-
-        // Get : / Account/ForgotPassword
         [HttpGet]
         [AllowAnonymous]
         public ActionResult ForgotPassword()
@@ -366,31 +296,30 @@ namespace IT_Solution_Platform.Controllers
             return View();
         }
 
-        // Post: /Account/ForgotPassword
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ForgotPassword(ForgotPasswordViewModel model) 
+        public async Task<ActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 _auditLogService.LogAudit(0, "Forgot Password Validation Failure", "User", null, new { Email = model.Email, Error = "Invalid model state" }, Request.UserHostAddress, Request.UserAgent);
                 return View(model);
             }
+
             var (success, message) = await _authService.ResetPasswordForEmailAsync(model.Email);
             if (success)
             {
                 TempData["SuccessMessage"] = message;
                 return RedirectToAction("ForgotPasswordConfirmation");
             }
-            else 
+            else
             {
                 TempData["ErrorMessage"] = message;
                 return View(model);
             }
         }
 
-        // Get: /Account/ForgotPasswordConfirmation
         [HttpGet]
         [AllowAnonymous]
         public ActionResult ForgotPasswordConfirmation()
@@ -401,28 +330,24 @@ namespace IT_Solution_Platform.Controllers
         #endregion
 
         #region Reset Password
-        // Get: /Account/ResetPassword
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult ResetPassword() 
+        public ActionResult ResetPassword()
         {
-            var model = new ResetPasswordViewModel();
-            return View(model);
+            return View(new ResetPasswordViewModel());
         }
 
-        // Post: /Account/ResetPassword
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ResetPassword(ResetPasswordViewModel model) 
+        public async Task<ActionResult> ResetPassword(ResetPasswordViewModel model)
         {
-            if (!ModelState.IsValid) 
+            if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
             var (success, message) = await _authService.UpdatePasswordAsync(model.AccessToken, model.RefreshToken, model.NewPassword);
-
             if (success)
             {
                 TempData["SuccessMessage"] = "Your password has been reset successfully. Please log in with your new password.";
@@ -439,32 +364,11 @@ namespace IT_Solution_Platform.Controllers
         #region LogOff
         [HttpGet]
         [AllowAnonymous]
-        [Authorize]
-        public ActionResult LogOff() 
+        public ActionResult LogOff()
         {
-            // Clear the access_token cookie
-            var cookie = new HttpCookie("access_token")
-            {
-                Expires = DateTime.UtcNow.AddDays(-1),
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict
-            };
-            Response.Cookies.Add(cookie);
-
-            // Clear session
-            Session.Clear();
-            Session.Abandon();
-
-
-            // Clear authentication
-            System.Web.Security.FormsAuthentication.SignOut(); // If usign forms authentication
-            HttpContext.User = null;
-            System.Threading.Thread.CurrentPrincipal = null;
 
             return RedirectToAction("Index", "Home");
         }
-
         #endregion
     }
 }

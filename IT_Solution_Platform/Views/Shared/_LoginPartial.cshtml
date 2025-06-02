@@ -1,15 +1,40 @@
-﻿@if (Request.IsAuthenticated)
+﻿@if (User.Identity.IsAuthenticated)
 {
-    using (Html.BeginForm("LogOff", "Account", FormMethod.Get, new { id = "logoutForm", @class = "navbar-right" }))
+    using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
     {
         @Html.AntiForgeryToken()
 
-        var fullName = Session["Fullname"] as string ?? "User";
         <ul class="navbar-nav navbar-right d-flex flex-row align-items-center">
-            <li class="nav-item">
-                @Html.ActionLink("Hello " + HttpUtility.HtmlEncode(fullName) + "!", "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage", @class = "nav-link" })
-                <span class="nav-link separator"> - </span>
-                <input type="submit" class="nav-link nav-link-submit" value="Log off" />
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-user"></i>
+                    @{ 
+
+                        // Get claims from ClaimsPrincipal
+                        var user = HttpContext.Current.User as System.Security.Claims.ClaimsPrincipal;
+                        var firstName = user?.Claims.FirstOrDefault(c => c.Type == "FirstName")?.Value ?? "";
+                        var lastName = user?.Claims.FirstOrDefault(c => c.Type == "LastName")?.Value ?? "";
+                        var fullName = $"{firstName} {lastName}".Trim();
+                        var displayName = string.IsNullOrEmpty(fullName) ? User.Identity.Name : fullName;
+                        // Get RoleId claim
+                        var currentUserRole = user?.Claims.FirstOrDefault(c => c.Type == "RoleId")?.Value ?? "";
+                        // Optionally map RoleId to role name if needed (see below for mapping)
+                        // var roleName = GetRoleName(currentUserRole);
+                    }
+
+                    Hello @Html.Raw(HttpUtility.HtmlEncode(displayName))!
+                    @if (!string.IsNullOrEmpty(currentUserRole))
+                    {
+                        <small class="text-muted">(@currentUserRole)</small>
+                    }
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                    @Html.ActionLink("Profile", "Profile", "Account", null, new { @class = "dropdown-item" })
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+                        <i class="fas fa-sign-out-alt"></i> Log off
+                    </a>
+                </div>
             </li>
         </ul>
     }
@@ -17,7 +42,12 @@
 else
 {
     <ul class="navbar-nav navbar-right">
-        <li class="nav-item">@Html.ActionLink("Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class = "nav-link" })</li>
+        <li class="nav-item">
+            @Html.ActionLink("Register", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink", @class = "nav-link" })
+        </li>
+        <li class="nav-item">
+            @Html.ActionLink("Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class = "nav-link" })
+        </li>
     </ul>
 }
 

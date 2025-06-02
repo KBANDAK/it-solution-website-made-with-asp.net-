@@ -3,11 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using IT_Solution_Platform.Services;
 
 namespace IT_Solution_Platform.Controllers
 {
     public class HomeController : Controller
     {
+        public HomeController(SupabaseAuthService authService, SupabaseDatabase databaseService) 
+        {
+        }
+
         // This home page
         [HttpGet]
         [AllowAnonymous]
@@ -17,7 +22,7 @@ namespace IT_Solution_Platform.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize]
         public ActionResult Services()
         {
             ViewBag.Message = "Your services page.";
