@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -82,37 +83,46 @@ namespace IT_Solution_Platform.Controllers
                     options
                 );
 
-                ViewBag.Email = model.Email;
-                ViewBag.Message = message;
-                TempData["Email"] = model.Email;
-                TempData["SuccessMessage"] = message;
-
-
+                if (string.IsNullOrEmpty(accessToken) && string.IsNullOrEmpty(message))
+                {
+                    _auditLogService.LogAudit(0, "Registration Failure", "User", null, new { Email = model.Email, Error = "Supabase sign-up failed" }, Request.UserHostAddress, Request.UserAgent);
+                    ViewBag.ErrorMessage = "Failed to register. Please try again later.";
+                    return View("Error");
+                }
 
                 // If access token is provided, user might be auto-verified
                 if (!string.IsNullOrEmpty(accessToken))
                 {
                     var supabaseUser = await _authService.GetUserByTokenAsync(accessToken);
-                    if (supabaseUser != null)
+                    if (supabaseUser == null)
                     {
-                        var dbUser = _databaseService.ExecuteQuery<Models.User>(
-                            "SELECT * FROM users WHERE supabase_uid = CAST(@SupabaseUid AS uuid)",
-                            new { SupabaseUid = supabaseUser.Id }).FirstOrDefault();
+                        _auditLogService.LogAudit(0, "Registration Failure", "User", null, new { Email = model.Email, Error = "Invalid access token" }, Request.UserHostAddress, Request.UserAgent);
+                        ViewBag.ErrorMessage = "Registration failed due to an invalid token. Please try again.";
+                        return View("Error");
+                    }
 
-                        if (dbUser != null && (bool)dbUser.is_active)
-                        {
-                            return RedirectToAction("Index", "Home");
-                        }
+                    var dbUser = _databaseService.ExecuteQuery<Models.User>(
+                        "SELECT * FROM users WHERE supabase_uid = CAST(@SupabaseUid AS uuid)",
+                        new { SupabaseUid = supabaseUser.Id }).FirstOrDefault();
+
+                    if (dbUser != null && (bool)dbUser.is_active)
+                    {
+                        return RedirectToAction("Index", "Home");
                     }
                 }
+
+                ViewBag.Email = model.Email;
+                ViewBag.Message = message;
+                TempData["Email"] = model.Email;
+                TempData["SuccessMessage"] = message;
 
                 return RedirectToAction("Verify");
             }
             catch (Exception ex)
             {
                 _auditLogService.LogAudit(0, "Registration Error", "User", null, new { Email = model.Email, Error = ex.Message }, Request.UserHostAddress, Request.UserAgent);
-                ModelState.AddModelError("", "An unexpected error occurred during registration. Please try again later.");
-                return View(model);
+                ViewBag.ErrorMessage = "An unexpected error occurred during registration. Please try again later.";
+                return View("Error");
             }
         }
         #endregion
@@ -182,8 +192,8 @@ namespace IT_Solution_Platform.Controllers
             catch (Exception ex)
             {
                 _auditLogService.LogAudit(0, "Verification Error", "User", null, new { Error = ex.Message }, Request.UserHostAddress, Request.UserAgent);
-                ViewBag.Message = "An error occurred during verification. Please try again or request a new confirmation email.";
-                return View("Verification");
+                ViewBag.ErrorMessage = "An unexpected error occurred during verification. Please try again later.";
+                return View("Error");
             }
         }
 
@@ -282,8 +292,8 @@ namespace IT_Solution_Platform.Controllers
             catch (Exception ex)
             {
                 _auditLogService.LogAudit(0, "Login Error", "User", null, new { Email = model.Email, Error = ex.Message }, Request.UserHostAddress, Request.UserAgent);
-                ModelState.AddModelError("", "An error occurred during login. Please try again.");
-                return View(model);
+                ViewBag.ErrorMessage = "An unexpected error occurred during login. Please try again.";
+                return View("Error");
             }
         }
         #endregion
@@ -306,18 +316,29 @@ namespace IT_Solution_Platform.Controllers
                 _auditLogService.LogAudit(0, "Forgot Password Validation Failure", "User", null, new { Email = model.Email, Error = "Invalid model state" }, Request.UserHostAddress, Request.UserAgent);
                 return View(model);
             }
+            try
+            {
+                var (success, message) = await _authService.ResetPasswordForEmailAsync(model.Email);
+                if (success)
+                {
+                    TempData["SuccessMessage"] = message;
+                    return RedirectToAction("ForgotPasswordConfirmation");
+                }
+                else
+                {
+                    _auditLogService.LogAudit(0, "Forgot Password Failure", "User", null, new { Email = model.Email, Error = message }, Request.UserHostAddress, Request.UserAgent);
+                    ViewBag.ErrorMessage = message ?? "Failed to send password reset email. Please try again.";
+                    return View("Error");
+                }
+            }
+            catch (Exception ex)
+            {
 
-            var (success, message) = await _authService.ResetPasswordForEmailAsync(model.Email);
-            if (success)
-            {
-                TempData["SuccessMessage"] = message;
-                return RedirectToAction("ForgotPasswordConfirmation");
+                _auditLogService.LogAudit(0, "Forgot Password Error", "User", null, new { Email = model.Email, Error = ex.Message }, Request.UserHostAddress, Request.UserAgent);
+                ViewBag.ErrorMessage = "An unexpected error occurred while processing your request. Please try again.";
+                return View("Error");
             }
-            else
-            {
-                TempData["ErrorMessage"] = message;
-                return View(model);
-            }
+           
         }
 
         [HttpGet]
@@ -346,29 +367,338 @@ namespace IT_Solution_Platform.Controllers
             {
                 return View(model);
             }
-
-            var (success, message) = await _authService.UpdatePasswordAsync(model.AccessToken, model.RefreshToken, model.NewPassword);
-            if (success)
+            try
             {
-                TempData["SuccessMessage"] = "Your password has been reset successfully. Please log in with your new password.";
-                return RedirectToAction("Login");
+                var (success, message) = await _authService.UpdatePasswordAsync(model.AccessToken, model.RefreshToken, model.NewPassword);
+                if (success)
+                {
+                    TempData["SuccessMessage"] = "Your password has been reset successfully. Please log in with your new password.";
+                    return RedirectToAction("Login");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = message;
+                    return View(model);
+                }
             }
-            else
+            catch (Exception ex) 
             {
-                TempData["ErrorMessage"] = message;
-                return View(model);
+                _auditLogService.LogAudit(0, "Reset Password Error", "User", null, new { Error = ex.Message }, Request.UserHostAddress, Request.UserAgent);
+                ViewBag.ErrorMessage = "An unexpected error occurred while resetting your password. Please try again.";
+                return View("Error");
             }
+            
         }
         #endregion
 
         #region LogOff
-        [HttpGet]
+        [HttpPost]
         [AllowAnonymous]
-        public ActionResult LogOff()
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> LogOff(string returnUrl = null)
         {
+            try
+            {
+                if (_authService == null)
+                {
+                    // Pass error message to Error.cshtml
+                    ViewBag.ErrorMessage = "Authentication service is unavailable.";
+                    return View("Error");
+                }
 
-            return RedirectToAction("Index", "Home");
+                await _authService.SignOutAsync();
+
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+
+                return RedirectToAction("Index", "Home");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (e.g., using ILogger)
+                ViewBag.ErrorMessage = "An error occurred during sign-out.";
+                return View("Error");
+            }
         }
+        #endregion
+
+
+        // Add these methods to your AccountController or create a ProfileController
+        #region Profile Methods
+
+        [HttpGet]
+        [Authorize]
+        [ActionName("Profile")]
+        public ActionResult UserProfile()
+        {
+            try
+            {
+                // Get user ID from claims
+                var claimsIdentity = User.Identity as ClaimsIdentity;
+                var userIdClaim = claimsIdentity?.FindFirst("UserId")?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    _auditLogService.LogAudit(
+                        userId: 0,
+                        action: "Profile Access Failure",
+                        entityType: "Profile",
+                        entityId: null,
+                        details: new { Error = "Invalid or missing UserId claim" },
+                        ipAddress: GetClientIpAddress(),
+                        userAgent: GetUserAgent()
+                    );
+                    ViewBag.ErrorMessage = "User session not found. Please try again after logging in.";
+                    return View("Error");
+                }
+
+                // Query user from database with role information
+                var query = @"
+            SELECT u.user_id, u.email, u.first_name, u.last_name, u.phone_number,
+                   u.is_active, u.created_at, u.updated_at, u.supabase_uid,
+                   u.role_id, u.password_hash, u.profile_picture, u.last_login,
+                   u.reset_token, u.reset_token_expires,
+                   r.role_name
+            FROM users u
+            LEFT JOIN roles r ON u.role_id = r.role_id
+            WHERE u.user_id = @UserId";
+
+                var user = _databaseService.ExecuteQuery<Models.User>(query, new { UserId = userId }).FirstOrDefault();
+
+                if (user == null)
+                {
+                    _auditLogService.LogAudit(
+                        userId: userId,
+                        action: "Profile Access Failure",
+                        entityType: "Profile",
+                        entityId: userId,
+                        details: new { Error = "User not found in database" },
+                        ipAddress: GetClientIpAddress(),
+                        userAgent: GetUserAgent()
+                    );
+                    ViewBag.ErrorMessage = "User profile not found. Please contact support.";
+                    return View("Error");
+                }
+
+                // Create view model
+                var viewModel = new ProfileViewModel
+                {
+                    UserId = user.user_id,
+                    Email = user.email,
+                    FirstName = user.first_name,
+                    LastName = user.last_name,
+                    PhoneNumber = user.phone_number,
+                    IsActive = user.is_active,
+                    RoleName = user.Role?.role_name ?? "User", // Handle null role
+                    CreatedAt = user.created_at,
+                    UpdatedAt = user.updated_at
+                };
+
+                // Log profile access
+                _auditLogService.LogAudit(
+                    userId: userId,
+                    action: "Profile Accessed",
+                    entityType: "Profile",
+                    entityId: userId,
+                    details: new { Action = "View Profile" },
+                    ipAddress: GetClientIpAddress(),
+                    userAgent: GetUserAgent()
+                );
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                // Log error
+                var claimsIdentity = User.Identity as ClaimsIdentity;
+                var userIdForLog = claimsIdentity?.FindFirst("UserId")?.Value ?? "Unknown";
+                _auditLogService.LogAudit(
+                    userId: 0,
+                    action: "Profile Access Error",
+                    entityType: "Profile",
+                    entityId: null,
+                    details: new { Error = ex.Message, UserId = userIdForLog },
+                    ipAddress: GetClientIpAddress(),
+                    userAgent: GetUserAgent()
+                );
+
+                ViewBag.ErrorMessage = "An unexpected error occurred while loading your profile. Please try again later.";
+                return View("Error");
+            }
+        }
+
+        // Helper method to safely get client IP address
+        private string GetClientIpAddress()
+        {
+            try
+            {
+                // For ASP.NET Framework - try UserHostAddress first
+                if (!string.IsNullOrEmpty(Request?.UserHostAddress))
+                {
+                    return Request.UserHostAddress;
+                }
+
+                // Check for forwarded headers (common in load balancer scenarios)
+                if (Request?.Headers != null)
+                {
+                    string forwarded = Request.Headers["X-Forwarded-For"];
+                    if (!string.IsNullOrEmpty(forwarded))
+                    {
+                        return forwarded.Split(',')[0].Trim();
+                    }
+
+                    forwarded = Request.Headers["X-Real-IP"];
+                    if (!string.IsNullOrEmpty(forwarded))
+                    {
+                        return forwarded;
+                    }
+                }
+
+                // Try server variables as fallback
+                if (Request?.ServerVariables != null)
+                {
+                    string remoteAddr = Request.ServerVariables["REMOTE_ADDR"];
+                    if (!string.IsNullOrEmpty(remoteAddr))
+                    {
+                        return remoteAddr;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Ignore exceptions in IP detection
+            }
+
+            return "Unknown";
+        }
+
+        // Helper method to safely get User Agent
+        private string GetUserAgent()
+        {
+            try
+            {
+                // For ASP.NET Framework - try UserAgent first
+                if (!string.IsNullOrEmpty(Request?.UserAgent))
+                {
+                    return Request.UserAgent;
+                }
+
+                // Try headers collection
+                if (Request?.Headers != null)
+                {
+                    string userAgent = Request.Headers["User-Agent"];
+                    if (!string.IsNullOrEmpty(userAgent))
+                    {
+                        return userAgent;
+                    }
+                }
+
+                // Try server variables as fallback
+                if (Request?.ServerVariables != null)
+                {
+                    string userAgent = Request.ServerVariables["HTTP_USER_AGENT"];
+                    if (!string.IsNullOrEmpty(userAgent))
+                    {
+                        return userAgent;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Ignore exceptions in User Agent detection
+            }
+
+            return "Unknown";
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public JsonResult UpdateProfile(string firstName, string lastName, string phoneNumber)
+        {
+            try
+            {
+                // Get user ID from claims (ASP.NET Framework approach)
+                var claimsIdentity = User.Identity as ClaimsIdentity;
+                var userIdClaim = claimsIdentity?.FindFirst("UserId")?.Value;
+
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Json(new { success = false, message = "User not found in session" });
+                }
+
+                // Validate input
+                if (string.IsNullOrWhiteSpace(firstName))
+                {
+                    return Json(new { success = false, message = "First name is required" });
+                }
+
+                if (string.IsNullOrWhiteSpace(lastName))
+                {
+                    return Json(new { success = false, message = "Last name is required" });
+                }
+
+                // Update user profile
+                var updateQuery = @"
+            UPDATE users 
+            SET first_name = @FirstName, 
+                last_name = @LastName, 
+                phone_number = @PhoneNumber, 
+                updated_at = GETDATE() 
+            WHERE user_id = @UserId";
+
+                var result = _databaseService.ExecuteNonQuery(updateQuery, new
+                {
+                    FirstName = firstName.Trim(),
+                    LastName = lastName.Trim(),
+                    PhoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? null : phoneNumber.Trim(),
+                    UserId = userId
+                });
+
+                if (result > 0)
+                {
+                    // Log successful update
+                    _auditLogService.LogAudit(
+                        userId,
+                        "Profile Updated",
+                        "Profile",
+                        userId,
+                        new
+                        {
+                            Action = "Update Profile",
+                            Changes = new { FirstName = firstName, LastName = lastName, PhoneNumber = phoneNumber }
+                        },
+                        Request.UserHostAddress ?? "Unknown",
+                        Request.UserAgent ?? "Unknown"
+                    );
+
+                    return Json(new { success = true, message = "Profile updated successfully" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "No changes were made to your profile" });
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error
+                var claimsIdentity = User.Identity as ClaimsIdentity;
+                var userIdForLog = claimsIdentity?.FindFirst("UserId")?.Value ?? "Unknown";
+                _auditLogService.LogAudit(
+                    0,
+                    "Profile Update Error",
+                    "Profile",
+                    null,
+                    new { Error = ex.Message, UserId = userIdForLog },
+                    Request.UserHostAddress ?? "Unknown",
+                    Request.UserAgent ?? "Unknown"
+                );
+
+                return Json(new { success = false, message = "An error occurred while updating profile" });
+            }
+        }
+
         #endregion
     }
 }

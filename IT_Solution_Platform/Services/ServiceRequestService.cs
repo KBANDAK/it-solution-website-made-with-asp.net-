@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
+using IT_Solution_Platform.Handlers;
 using IT_Solution_Platform.Models;
 using Newtonsoft.Json;
 using Supabase;
@@ -20,279 +21,170 @@ namespace IT_Solution_Platform.Services
         // Consider injecting Supabase Client via DI if possible in your setup
         private readonly AuditLogService _auditLogService;
         private readonly SupabaseDatabase _databaseService;
+        private readonly ServiceRequestHandlerFactory _handleFactory;
+        private readonly FileUploadService _fileUploadService;
         private readonly Supabase.Client _supabaseClient;
 
         // Remove the instance client - use ClientManager instead
         public string IpAddress { get; set; }
         public string UserAgent { get; set; }
         public ServiceRequestService()
-        { 
+        {
             _databaseService = new SupabaseDatabase();
             _auditLogService = new AuditLogService(_databaseService);
             _supabaseClient = SupabaseConfig.GetServiceClient();
+            _handleFactory = new ServiceRequestHandlerFactory();
+            _fileUploadService = new FileUploadService(_supabaseClient, _auditLogService);
         }
 
-        // Define the bucket name where documents will be stored in Supabase Storage
-        private const string ServiceRequestDocumentBucket = "service-request-documents"; // CHANGE BUCKET NAME AS NEEDED
         private const string ServiceRequestType = "ServiceRequest";
 
-        public async Task<int?> CreatePenTestingServiceRequestAsync(PenTestingRequestViewModel model, int userId, string accessToken = null)
+
+        /// <summary>
+        /// Unified method to create a service request for different service types.
+        /// </summary>
+        /// <param name="model">The view model (PenTestingRequestViewModel or MobileWebAppRequestViewModel).</param>
+        /// <param name="userId">The ID of the user making the request.</param>
+        /// <param name="accessToken">The access token for authentication.</param>
+        /// <returns>The ID of the created service request, or null if creation fails.</returns>
+
+        public async Task<int?> CreateServiceRequestAsync(object model, int userId, string accessToken = null)
         {
-            var refreshToken = HttpContext.Current?.Request.Cookies["refresh_token"]?.Value;
-            if (model == null) 
+            if (model == null)
             {
-                _auditLogService.LogAudit
-                (
-                    userId,
-                    ServiceRequestType,
-                    ErrorType.InvalidInput.ToString(),
-                    null,
-                    new { ErrorMessage = "Model or Supabase Client is null" },
-                    IpAddress,
-                    UserAgent
-                );
+                _auditLogService.LogAudit(userId, ServiceRequestType, ErrorType.InvalidInput.ToString(),
+                    null, new { ErrorMessage = "Model is null" }, IpAddress, UserAgent);
                 return null;
             }
+
             try
             {
-                // 1. Prepare request detail
-                var requestDetailsDict = new Dictionary<string, object>
+                // 1. Get apropriate handler for the service type
+                var handler = _handleFactory.GetHandler(model.GetType());
+                if (handler == null)
                 {
-                     { "TargetSystem", model.TargetSystem },
-                     { "ScopeDescription", model.ScopeDescription },
-                     { "TestingObjectives", model.TestingObjectives },
-                     { "PreferredStartDate", model.PreferredStartDate?.ToString("yyyy-MM-dd") },
-                     { "PreferredEndDate", model.PreferredEndDate?.ToString("yyyy-MM-dd") },
-                     { "PrimaryContactName", model.PrimaryContactName },
-                     { "PrimaryContactEmail", model.PrimaryContactEmail },
-                     { "PrimaryContactPhone", model.PrimaryContactPhone },
-                     { "ComplianceRequirements", model.ComplianceRequirements },
-                     { "AdditionalNotes", model.AdditionalNotes }
-                };
+                    _auditLogService.LogAudit(userId, ServiceRequestType, ErrorType.InvalidInput.ToString(),
+                         null, new { ErrorMessage = "Unsupported model type" }, IpAddress, UserAgent);
+                    return null;
+                }
 
-                string requestDetailsJson = JsonConvert.SerializeObject(requestDetailsDict);
+                // 2. Validate the model
+                if (!handler.ValidateModel(model, out string validationError))
+                {
+                    _auditLogService.LogAudit(userId, ServiceRequestType, ErrorType.InvalidInput.ToString(),
+                        null, new { ErrorMessage = validationError }, IpAddress, UserAgent);
+                    return null;
+                }
 
-                // 2. Create ServiceRequest Object
+                // 3. Extract request details using the handler
+                var requestDetails = handler.ExtractRequestDetails(model);
+                var supportingDocuments = handler.GetSupportingDocuments(model);
+                var serviceId = handler.GetServiceId(model);
+
+                // 4. Create service request
                 var newRequest = new ServiceRequest
                 {
                     UserId = userId,
-                    ServiceId = model.ServiceId,
-                    StatusId = 1, // Default 'submitted' status
-                    RequestDetails = requestDetailsJson,
+                    ServiceId = serviceId,
+                    StatusId = 1,
+                    RequestDetails = JsonConvert.SerializeObject(requestDetails),
                     RequestedDate = DateTime.UtcNow,
                     Notes = "Submitted via web form",
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
 
-                // 3. Handle file uploads first (if any)
+                // 5. Handle file uploads (can handle multiple files)
                 var uploadedDocuments = new List<ServiceRequestDocument>();
-                if (model.SupportingDocuments != null && model.SupportingDocuments.Any())
+                if (supportingDocuments != null && supportingDocuments.Any())
                 {
-                    // Get the current user ID for folder structure
-                    string userFolder;
-                    if (!string.IsNullOrEmpty(accessToken))
+                    try
                     {
-                        var currentUser = _supabaseClient.Auth.CurrentUser;
-                        userFolder = currentUser?.Id ?? $"user_{userId}";
+                        uploadedDocuments = await _fileUploadService.UploadDocumentsAsync(
+                            supportingDocuments, userId, accessToken, IpAddress, UserAgent);
+
+                        _auditLogService.LogAudit(userId, ServiceRequestType, "FileUploadSuccess",
+                            null, new { Message = $"Successfully uploaded {uploadedDocuments.Count} files" }, IpAddress, UserAgent);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        userFolder = $"user_{userId}";
-                    }
-
-                    foreach (var file in model.SupportingDocuments)
-                    {
-                        if (file == null || file.ContentLength == 0)
-                        {
-                            _auditLogService.LogAudit(
-                                userId,
-                                ServiceRequestType,
-                                ErrorType.InvalidFile.ToString(),
-                                null,
-                                new { ErrorMessage = "Null or empty file provided", Filename = file?.FileName },
-                                IpAddress,
-                                UserAgent
-                            );
-                            return null; // Fail early if any file is invalid
-                        }
-
-                        var allowedExtenstion = new[] { ".pdf", ".doc", ".docs", ".txt" };
-                        var extenstion = Path.GetExtension(file.FileName).ToLowerInvariant();
-                        if (!allowedExtenstion.Contains(extenstion))
-                        {
-                            _auditLogService.LogAudit(
-                                userId,
-                                ServiceRequestType,
-                                ErrorType.InvalidFileType.ToString(),
-                                null,
-                                new { ErrorMessage = $"Invalid file extenstion: {extenstion}", Filename = file.FileName },
-                                IpAddress,
-                                UserAgent
-                            );
-                            return null;
-                        }
-
-                        if (file.ContentLength > 5 * 1024 * 1024) // 5MB Limit
-                        {
-                            _auditLogService.LogAudit(
-                                userId,
-                                ServiceRequestType,
-                                ErrorType.FileSizeLimitExceeded.ToString(),
-                                null,
-                                new { ErrorMessage = $"File size exceeds 5MB: {file.ContentLength}", Filename = file.FileName },
-                                IpAddress,
-                                UserAgent
-                            );
-                            return null;
-                        }
-
-                        string uniqueFileName = $"{Guid.NewGuid()}{extenstion}";
-                        string storagePath = $"{userFolder}/{uniqueFileName}"; // Store without request initially
-
-                        byte[] fileBytes;
-                        using (var memoryStream = new MemoryStream())
-                        {
-                            await file.InputStream.CopyToAsync(memoryStream);
-                            fileBytes = memoryStream.ToArray();
-                        }
-
-                        var storageResponse = await _supabaseClient.Storage
-                            .From(ServiceRequestDocumentBucket)
-                            .Upload(fileBytes, storagePath, new Supabase.Storage.FileOptions
-                            {
-                                CacheControl = "3600",
-                                Upsert = false,
-                                
-                            });
-
-                        if (string.IsNullOrEmpty(storageResponse))
-                        {
-                            _auditLogService.LogAudit(
-                                userId,
-                                ServiceRequestType,
-                                ErrorType.FileUploadError.ToString(),
-                                null,
-                                new { ErorrMessage = $"Failed to upload file: {file.FileName}", Filename = file.FileName },
-                                IpAddress,
-                                UserAgent
-                            );
-                            return null; // Fail if any upload fails
-                        }
-
-                        uploadedDocuments.Add(new ServiceRequestDocument
-                        {
-                            FileName = Path.GetFileName(file.FileName),
-                            StoragePath = storagePath,
-                            UploadedAt = DateTime.UtcNow,
-                        });
+                        _auditLogService.LogAudit(userId, ServiceRequestType, ErrorType.FileUploadError.ToString(),
+                            null, new { ErrorMessage = ex.Message, FileCount = supportingDocuments.Length }, IpAddress, UserAgent);
+                        return null;
                     }
                 }
 
-                // 4. Insert ServiceRequest only after successful file uploads
+                // 6. Insert service request
                 var insertResponse = await _supabaseClient.From<ServiceRequest>().Insert(newRequest);
                 if (insertResponse.Models == null || !insertResponse.Models.Any())
                 {
-                    _auditLogService.LogAudit(
-                        userId,
-                        ServiceRequestType,
-                        ErrorType.InsertErrror.ToString(),
-                        null,
-                        new { ErrorMessage = $"Failed to insert service request: {insertResponse.ResponseMessage?.ReasonPhrase}" },
-                        IpAddress,
-                        UserAgent
-                    );
-                    // Clean uploaded files if request insertaion fails
-                    foreach (var doc in uploadedDocuments)
+                    // Cleanup uploaded files if service request creation fails
+                    if (uploadedDocuments.Any())
                     {
-                        await _supabaseClient.Storage.From(ServiceRequestDocumentBucket).Remove(doc.StoragePath);
+                        await _fileUploadService.CleanupDocumentsAsync(uploadedDocuments);
                     }
+                    await _fileUploadService.CleanupDocumentsAsync(uploadedDocuments);
+                    _auditLogService.LogAudit(userId, ServiceRequestType, ErrorType.InsertErrror.ToString(),
+                        null, new { ErrorMessage = "Failed to insert service request" }, IpAddress, UserAgent);
                     return null;
                 }
 
                 var createdRequest = insertResponse.Models.First();
                 int newRequestId = createdRequest.RequestId;
 
-                // 5. Update document references with RequestId and insert
+                // 7. Update document references and insert document records
                 if (uploadedDocuments.Any())
                 {
-                    foreach (var doc in uploadedDocuments)
+                    try
                     {
-                        // Update storage path to include requestId
-                        var oldPath = doc.StoragePath;
-                        var pathParts = oldPath.Split('/');
-                        var newPath = $"{pathParts[0]}/{newRequestId}/{Path.GetFileName(oldPath)}";
+                        // Update storage paths to include request ID
+                        await _fileUploadService.UpdateDocumentPathsAsync(uploadedDocuments, newRequestId);
 
-                        await _supabaseClient.Storage.From(ServiceRequestDocumentBucket).Move(oldPath, newPath);
-                        doc.StoragePath = newPath;
-                        doc.RequestId = newRequestId;
-                    }
-
-                    var docInsertResponse = await _supabaseClient.From<ServiceRequestDocument>().Insert(uploadedDocuments);
-                    if (docInsertResponse.Models == null || !docInsertResponse.Models.Any())
-                    {
-                        _auditLogService.LogAudit(
-                            userId,
-                            ServiceRequestType,
-                            ErrorType.DocumentInsertError.ToString(),
-                            newRequestId,
-                            new { ErrorMessage = $"Failed to insert document references for request {newRequestId}: {docInsertResponse.ResponseMessage?.ReasonPhrase}" },
-                            IpAddress,
-                            UserAgent
-                        );
-
-                        // Cleanup: Delete the service request and uploaded files
-                        await _supabaseClient.From<ServiceRequest>().Where(x => x.RequestId == newRequestId).Delete();
-                        foreach (var doc in uploadedDocuments)
+                        // Insert document records into database
+                        var docInsertResponse = await _supabaseClient.From<ServiceRequestDocument>().Insert(uploadedDocuments);
+                        if (docInsertResponse.Models == null || !docInsertResponse.Models.Any())
                         {
-                            await _supabaseClient.Storage.From(ServiceRequestDocumentBucket).Remove(doc.StoragePath);
+                            // Rollback: Delete the service request and cleanup files
+                            await _supabaseClient.From<ServiceRequest>().Where(x => x.RequestId == newRequestId).Delete();
+                            await _fileUploadService.CleanupDocumentsAsync(uploadedDocuments);
+
+                            _auditLogService.LogAudit(userId, ServiceRequestType, ErrorType.DocumentInsertError.ToString(),
+                                newRequestId, new { ErrorMessage = "Failed to insert document references", DocumentCount = uploadedDocuments.Count }, IpAddress, UserAgent);
+                            return null;
                         }
+
+                        _auditLogService.LogAudit(userId, ServiceRequestType, "DocumentInsertSuccess",
+                            newRequestId, new { Message = $"Successfully inserted {uploadedDocuments.Count} document references" }, IpAddress, UserAgent);
+                    }
+                    catch (Exception docEx)
+                    {
+                        // Rollback: Delete the service request and cleanup files
+                        await _supabaseClient.From<ServiceRequest>().Where(x => x.RequestId == newRequestId).Delete();
+                        await _fileUploadService.CleanupDocumentsAsync(uploadedDocuments);
+
+                        _auditLogService.LogAudit(userId, ServiceRequestType, ErrorType.DocumentProcessingError.ToString(),
+                            newRequestId, new { ErrorMessage = docEx.Message, DocumentCount = uploadedDocuments.Count }, IpAddress, UserAgent);
                         return null;
                     }
                 }
 
-                _auditLogService.LogAudit(
-                    userId,
-                    ServiceRequestType,
-                    ErrorType.Created.ToString(),
-                    newRequestId,
-                    new { Message = "Service request created successfully", RequestId = newRequestId, DocumentCount = uploadedDocuments.Count },
-                    IpAddress,
-                    UserAgent
-                );
+
+
+                _auditLogService.LogAudit(userId, ServiceRequestType, ErrorType.Created.ToString(),
+                    newRequestId, new { Message = "Service request created successfully", RequestId = newRequestId, DocumentCount = uploadedDocuments.Count }, IpAddress, UserAgent);
 
                 return newRequestId;
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                _auditLogService.LogAudit(
-                    userId,
-                    "ServiceRequest",
-                    "AuthenticationError",
-                    null,
-                    new { ErrorMessage = ex.Message, StackTrace = ex.StackTrace },
-                    IpAddress,
-                    UserAgent
-                );
-                return null;
-            }
             catch (Exception ex)
             {
-                _auditLogService.LogAudit(
-                    userId,
-                    ServiceRequestType,
-                    ErrorType.UnexpectedError.ToString(),
-                    null,
-                    new { ErrorMessage = ex.Message, StackTrace = ex.StackTrace },
-                    IpAddress,
-                    UserAgent
-                );
+                _auditLogService.LogAudit(userId, ServiceRequestType, ErrorType.UnexpectedError.ToString(),
+                    null, new { ErrorMessage = ex.Message, StackTrace = ex.StackTrace }, IpAddress, UserAgent);
                 return null;
             }
         }
     }
 
-    enum ErrorType 
+    enum ErrorType
     {
         InvalidInput,
         AuthenticationError,
@@ -303,6 +195,7 @@ namespace IT_Solution_Platform.Services
         InsertErrror,
         DocumentInsertError,
         Created,
-        UnexpectedError
+        UnexpectedError,
+        DocumentProcessingError
     }
 }

@@ -1,0 +1,510 @@
+﻿@model IT_Solution_Platform.Models.ProfileViewModel
+@{
+    ViewBag.Title = "Profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .profile-container {
+            min-height: calc(100vh - 120px);
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #0a0f1a 50%, var(--dark-bg) 100%);
+            padding: 2rem 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .profile-container::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: radial-gradient(circle at 20% 80%, var(--primary-glow) 0%, transparent 50%), radial-gradient(circle at 80% 20%, var(--accent-glow) 0%, transparent 50%);
+                pointer-events: none;
+                z-index: 1;
+            }
+
+        .profile-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: slideInDown 0.8s ease-out;
+        }
+
+        .profile-title {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 30px var(--primary-glow);
+        }
+
+        .profile-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @@media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .profile-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+            .profile-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+                transform: scaleX(0);
+                transition: var(--transition);
+            }
+
+            .profile-card:hover {
+                transform: translateY(-5px);
+                box-shadow: var(--hover-shadow);
+                border-color: var(--border-hover);
+            }
+
+                .profile-card:hover::before {
+                    transform: scaleX(1);
+                }
+
+        .avatar-section {
+            text-align: center;
+            animation: slideInLeft 0.8s ease-out 0.2s both;
+        }
+
+        .avatar-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+
+        .avatar {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--dark-bg);
+            box-shadow: 0 0 40px var(--primary-glow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+            .avatar::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+                transform: rotate(45deg);
+                animation: shimmer 3s infinite;
+            }
+
+        @@keyframes shimmer {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+
+            50% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+            }
+
+            100% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+        }
+
+        .user-name {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text-bright);
+            margin-bottom: 0.5rem;
+        }
+
+        .user-role {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 0.25rem 0.75rem;
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid var(--primary-color);
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .info-section {
+            animation: slideInRight 0.8s ease-out 0.4s both;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-bright);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+            position: relative;
+        }
+
+            .section-title::after {
+                content: '';
+                position: absolute;
+                bottom: -2px;
+                left: 0;
+                width: 50px;
+                height: 2px;
+                background: var(--accent-color);
+            }
+
+        .info-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .info-item {
+            background: var(--input-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: var(--transition);
+            position: relative;
+        }
+
+            .info-item:hover {
+                border-color: var(--border-hover);
+                background: var(--card-hover);
+            }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-value {
+            color: var(--text-bright);
+            font-size: 1.1rem;
+            font-weight: 400;
+            word-break: break-word;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .status-inactive {
+            background: rgba(255, 68, 68, 0.1);
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        .security-section {
+            grid-column: 1 / -1;
+            animation: slideInUp 0.8s ease-out 0.6s both;
+        }
+
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .security-item {
+            background: var(--input-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+            .security-item:hover {
+                border-color: var(--border-hover);
+                transform: translateY(-2px);
+            }
+
+        .security-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .security-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-bright);
+            margin-bottom: 0.5rem;
+        }
+
+        .security-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .edit-button {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dim));
+            color: var(--dark-bg);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 5px 15px var(--primary-glow);
+            margin-top: 1rem;
+        }
+
+            .edit-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px var(--primary-glow);
+                background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+            }
+
+        @@keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @@keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @@keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+    </style>
+}
+
+<div class="profile-container">
+    <div class="profile-content">
+        <div class="profile-header">
+            <h1 class="profile-title">User Profile</h1>
+            <p class="profile-subtitle">Manage your account information and preferences</p>
+        </div>
+
+        <div class="profile-grid">
+            <!-- Avatar Section -->
+            <div class="profile-card avatar-section">
+                <div class="avatar-container">
+                    <div class="avatar">
+                        <span id="user-initials">@(string.IsNullOrEmpty(Model.FirstName) ? "--" : Model.FirstName[0].ToString().ToUpper() + (string.IsNullOrEmpty(Model.LastName) ? "" : Model.LastName[0].ToString().ToUpper()))</span>
+                    </div>
+                </div>
+                <div class="user-name">@(Model.FirstName + " " + Model.LastName)</div>
+                <div class="user-role">@(Model.RoleName ?? "None")</div>
+                <button class="edit-button" onclick="toggleEditMode()">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </button>
+            </div>
+
+            <!-- Information Section -->
+            <div class="profile-card info-section">
+                <h2 class="section-title">
+                    <i class="fas fa-user"></i> Personal Information
+                </h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-envelope"></i> Email Address
+                        </div>
+                        <div class="info-value">@(Model.Email ?? "N/A")</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-user"></i> First Name
+                        </div>
+                        <div class="info-value">@(Model.FirstName ?? "N/A")</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-user"></i> Last Name
+                        </div>
+                        <div class="info-value">@(Model.LastName ?? "N/A")</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-phone"></i> Phone Number
+                        </div>
+                        <div class="info-value">@(Model.PhoneNumber ?? "N/A")</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-calendar"></i> Member Since
+                        </div>
+                        <div class="info-value">@Model.CreatedAt.ToString()</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-toggle-on"></i> Account Status
+                        </div>
+                        <div class="info-value">
+                            <span class="status-indicator @(Model.IsActive ? "status-active" : "status-inactive")">
+                                <span class="status-dot"></span>
+                                @(Model.IsActive ? "Active" : "Inactive")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Section -->
+        <div class="profile-card security-section">
+            <h2 class="section-title">
+                <i class="fas fa-shield-alt"></i> Security & Authentication
+            </h2>
+            <div class="security-grid">
+                <div class="security-item">
+                    <div class="security-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <div class="security-title">Password</div>
+                    <div class="security-desc">Your password is managed securely through Supabase authentication</div>
+                </div>
+                <div class="security-item">
+                    <div class="security-icon">
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                    <div class="security-title">Email Verification</div>
+                    <div class="security-desc">Your email address has been verified and is secure</div>
+                </div>
+                <div class="security-item">
+                    <div class="security-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="security-title">Last Login</div>
+                    <div class="security-desc">Session information available</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleEditMode() {
+            alert('Edit functionality will be implemented in future updates.');
+        }
+
+        // Remove loading states (not needed with server-side rendering)
+        document.querySelectorAll('.loading').forEach(element => {
+            element.classList.remove('loading');
+        });
+    </script>
+}

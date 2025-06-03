@@ -339,6 +339,7 @@ namespace IT_Solution_Platform.Services
                      new Claim(ClaimTypes.Name, user.email),
                      new Claim(ClaimTypes.Email, user.email),
                      new Claim("SupabaseUserId", user.supabase_uid.ToString()),
+                     new Claim("UserId", user.user_id.ToString()),
                      new Claim("FirstName", user.first_name ?? ""),
                      new Claim("LastName", user.last_name ?? ""),
                      new Claim("AccessToken", accessToken ?? ""),

@@ -1,55 +1,53 @@
-﻿@if (User.Identity.IsAuthenticated)
+﻿@using System.Security.Claims
+@if (User.Identity.IsAuthenticated)
 {
-    using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+    using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
     {
         @Html.AntiForgeryToken()
 
-        <ul class="navbar-nav navbar-right d-flex flex-row align-items-center">
+        <ul class="navbar-nav d-flex flex-row align-items-center">
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fas fa-user"></i>
-                    @{ 
-
-                        // Get claims from ClaimsPrincipal
+                    @{
                         var user = HttpContext.Current.User as System.Security.Claims.ClaimsPrincipal;
                         var firstName = user?.Claims.FirstOrDefault(c => c.Type == "FirstName")?.Value ?? "";
                         var lastName = user?.Claims.FirstOrDefault(c => c.Type == "LastName")?.Value ?? "";
                         var fullName = $"{firstName} {lastName}".Trim();
-                        var displayName = string.IsNullOrEmpty(fullName) ? User.Identity.Name : fullName;
-                        // Get RoleId claim
-                        var currentUserRole = user?.Claims.FirstOrDefault(c => c.Type == "RoleId")?.Value ?? "";
-                        // Optionally map RoleId to role name if needed (see below for mapping)
-                        // var roleName = GetRoleName(currentUserRole);
+                        var displayName = string.IsNullOrEmpty(fullName) ? User.Identity?.Name ?? "User" : fullName;
+                        var currentUserRole = user?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value ?? "";
                     }
-
                     Hello @Html.Raw(HttpUtility.HtmlEncode(displayName))!
                     @if (!string.IsNullOrEmpty(currentUserRole))
                     {
                         <small class="text-muted">(@currentUserRole)</small>
                     }
                 </a>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                    @Html.ActionLink("Profile", "Profile", "Account", null, new { @class = "dropdown-item" })
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
-                        <i class="fas fa-sign-out-alt"></i> Log off
-                    </a>
-                </div>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    <li>@Html.ActionLink("Profile", "Profile", "Account", null, new { @class = "dropdown-item" })</li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+                            <i class="fas fa-sign-out-alt"></i> Log off
+                        </a>
+                    </li>
+                </ul>
             </li>
         </ul>
     }
 }
 else
 {
-    <ul class="navbar-nav navbar-right">
+    <ul class="navbar-nav navbar-right d-flex flex-row align-items-center">
         <li class="nav-item">
-            @Html.ActionLink("Register", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink", @class = "nav-link" })
+            @Html.ActionLink("Register", "Register", "Account", null, new { id = "registerLink", @class = "nav-link" })
         </li>
         <li class="nav-item">
-            @Html.ActionLink("Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class = "nav-link" })
+            @Html.ActionLink("Log in", "Login", "Account", null, new { id = "loginLink", @class = "nav-link" })
         </li>
     </ul>
 }
+
 
 <style>
     .navbar-nav.d-flex {
@@ -60,39 +58,84 @@ else
     .navbar-nav .nav-item {
         display: inline-flex;
         align-items: center;
+        position: relative; /* Ensures dropdown stays relative to nav-item */
     }
 
     .navbar-nav .nav-link {
-        padding: 0 6px;
+        padding: 0 8px;
         display: inline-block;
-        color: #fff; /* Match your theme */
+        color: var(--text-primary);
         text-decoration: none;
+        transition: var(--transition-smooth);
     }
 
         .navbar-nav .nav-link:hover {
-            text-decoration: underline;
+            color: var(--primary-color);
+            text-decoration: none;
         }
 
     .navbar-nav .separator {
-        color: #fff; /* Match your theme */
-        padding: 0 6px;
+        color: var(--text-muted);
+        padding: 0 8px;
     }
 
     .navbar-nav .nav-link-submit {
         background: none;
         border: none;
-        padding: 0 6px;
-        color: #fff; /* Match your theme */
-        font: inherit; /* Inherit font from parent */
+        padding: 0 8px;
+        color: var(--text-primary);
+        font-family: inherit;
         cursor: pointer;
         display: inline-block;
         text-decoration: none;
-        appearance: none; /* Remove browser-specific styling */
+        appearance: none;
         -webkit-appearance: none;
         -moz-appearance: none;
+        transition: var(--transition-smooth);
     }
 
         .navbar-nav .nav-link-submit:hover {
-            text-decoration: underline;
+            color: var(--primary-color);
+            text-decoration: none;
         }
+
+    /* Dropdown menu styling */
+    .dropdown-menu {
+        min-width: 120px; /* Slightly wider for better readability */
+        background: var(--glass-bg);
+        backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--border-light);
+        box-shadow: var(--box-shadow);
+        transition: var(--transition);
+        position: absolute; /* Ensures dropdown is positioned relative to parent */
+        top: 100%; /* Aligns directly below the toggle */
+        right: 0; /* Aligns to the right edge of the toggle */
+        z-index: 1000; /* Ensures dropdown appears above other elements */
+        margin: 0; /* Removes any default margin */
+    }
+
+        .dropdown-menu.show {
+            display: block; /* Ensures visibility when toggled */
+            opacity: 1;
+            transform: translateY(0); /* Smooth appearance */
+        }
+
+    .dropdown-item {
+        background: transparent;
+        color: var(--text-primary);
+        padding: 8px 12px;
+        transition: var(--transition-smooth);
+        width: 100%; /* Ensures items fill the dropdown */
+        box-sizing: border-box; /* Prevents padding from causing overflow */
+    }
+
+        .dropdown-item:hover {
+            background: var(--card-hover);
+            color: var(--primary-color);
+        }
+
+    .dropdown-divider {
+        border-top: 1px solid var(--border-light);
+        margin: 5px 0;
+    }
 </style>

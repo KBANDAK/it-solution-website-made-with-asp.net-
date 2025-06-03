@@ -1,0 +1,1069 @@
+﻿@model IT_Solution_Platform.Models.NetworkServiceModel
+@using IT_Solution_Platform.Models
+@using IT_Solution_Platform.Helpers
+
+
+@{
+    ViewBag.Title = "Network Service Request";
+}
+
+@section Styles {
+    <!-- Reuse the same styles as PenTesting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Network Service Request Styles */
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Background elements */
+        .background-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(var(--primary-glow) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.1;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(to right, var(--border-light) 1px, transparent 1px), linear-gradient(to bottom, var(--border-light) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.3;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .form-progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            width: 0%;
+            transition: var(--transition);
+            z-index: 1010;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--glass-strong);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition-fast);
+        }
+
+            .loading-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid transparent;
+            border-top: 3px solid var(--primary-color);
+            border-right: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        @@keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Container styles */
+        .container-request {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .form-continer-request {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--box-shadow);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+            .form-continer-request:hover {
+                transform: translateY(-5px);
+                box-shadow: var(--hover-shadow);
+                border-color: var(--border-hover);
+            }
+
+            .form-continer-request:before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 3px;
+                height: 100%;
+                background: linear-gradient(to bottom, var(--primary-color), var(--accent-color));
+                box-shadow: 0 0 20px var(--primary-glow);
+            }
+
+        .form-header-request {
+            text-align: center;
+            margin-bottom: 35px;
+            position: relative;
+        }
+
+            .form-header-request h1 {
+                font-family: 'JetBrains Mono', monospace;
+                font-weight: 600;
+                color: var(--text-bright);
+                margin-bottom: 10px;
+                letter-spacing: 1px;
+            }
+
+            .form-header-request .substitle {
+                color: var(--text-secondary);
+                font-size: 1.1rem;
+                margin-bottom: 20px;
+            }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            background-color: var(--section-bg);
+            border-radius: 30px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-light);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            margin-top: 15px;
+        }
+
+            .security-badge i {
+                margin-right: 8px;
+                color: var(--primary-color);
+            }
+
+        /* Section styling */
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            font-size: 1.25rem;
+            color: var(--text-bright);
+            margin-bottom: 25px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+            .section-title i {
+                margin-right: 12px;
+                color: var(--primary-color);
+                font-size: 1.1em;
+            }
+
+        /* Form controls */
+        .form-floating .form-control,
+        .form-floating .form-select {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            border-radius: 8px;
+            height: 58px;
+            box-shadow: none;
+            transition: var(--transition-fast);
+        }
+
+            .form-floating .form-control:focus,
+            .form-floating .form-select:focus {
+                border-color: var(--border-focus);
+                box-shadow: 0 0 0 3px var(--primary-glow);
+                background-color: rgba(21, 26, 40, 0.9);
+            }
+
+        .form-floating textarea.form-control {
+            height: 120px;
+        }
+
+        .form-floating label {
+            color: var(--text-secondary);
+            padding-left: 12px;
+            font-weight: 500;
+        }
+
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label,
+        .form-floating > .form-select ~ label {
+            color: var(--primary-dim);
+            opacity: 0.9;
+            transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+        }
+
+        /* File upload area */
+        .file-upload-area {
+            border: 2px dashed var(--border-light);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            background-color: var(--input-bg);
+        }
+
+            .file-upload-area:hover {
+                border-color: var(--primary-dim);
+                background-color: rgba(21, 26, 40, 0.8);
+            }
+
+            .file-upload-area i {
+                font-size: 2.5rem;
+                color: var(--primary-color);
+                margin-bottom: 15px;
+                display: block;
+            }
+
+            .file-upload-area h5 {
+                color: var(--text-bright);
+                margin-bottom: 10px;
+                font-family: 'JetBrains Mono', monospace;
+            }
+
+            .file-upload-area p {
+                color: var(--text-secondary);
+                font-size: 0.9rem;
+                margin-bottom: 0;
+            }
+
+        #fileList {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            background-color: var(--section-bg);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+        }
+
+            .file-item i {
+                margin-right: 8px;
+                color: var(--primary-color);
+            }
+
+        .remove-file {
+            margin-left: 8px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+            .remove-file:hover {
+                color: var(--error-color);
+            }
+
+        /* Custom checkbox and radio styles */
+        .form-check {
+            margin-bottom: 15px;
+        }
+
+        .form-check-input {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-light);
+        }
+
+            .form-check-input:checked {
+                background-color: var(--primary-color);
+                border-color: var(--primary-color);
+            }
+
+            .form-check-input:focus {
+                border-color: var(--border-focus);
+                box-shadow: 0 0 0 3px var(--primary-glow);
+            }
+
+        .form-check-label {
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        /* Multi-select days */
+        .days-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .day-checkbox {
+            display: none;
+        }
+
+        .day-label {
+            padding: 8px 16px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+            .day-label:hover {
+                border-color: var(--primary-dim);
+                background-color: rgba(21, 26, 40, 0.8);
+            }
+
+        .day-checkbox:checked + .day-label {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--dark-bg);
+        }
+
+        /* Submit button */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dim));
+            border: none;
+            color: var(--dark-bg);
+            padding: 12px 30px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            border-radius: 30px;
+            letter-spacing: 0.5px;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-fast);
+            box-shadow: 0 5px 15px var(--primary-glow);
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px var(--primary-glow);
+            }
+
+            .btn-primary:active {
+                transform: translateY(1px);
+            }
+
+            .btn-primary::after {
+                content: '';
+                position: absolute;
+                top: -50%;
+                right: -50%;
+                bottom: -50%;
+                left: -50%;
+                background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0));
+                transform: rotate(30deg) translate(-100%, 0);
+                opacity: 0;
+                transition: var(--transition);
+            }
+
+            .btn-primary:hover::after {
+                transform: rotate(30deg) translate(100%, 0);
+                opacity: 0.6;
+                transition: var(--transition-long);
+            }
+
+        /* Validation styling */
+        .field-validation-error {
+            color: var(--error-color);
+            font-size: 0.85rem;
+            display: block;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        .validation-summary-errors {
+            background-color: rgba(255, 68, 68, 0.1);
+            border: 1px solid var(--error-color);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            color: var(--error-color);
+        }
+
+            .validation-summary-errors ul {
+                margin-bottom: 0;
+                padding-left: 20px;
+            }
+
+        .is-invalid {
+            border-color: var(--error-color) !important;
+            box-shadow: 0 0 0 3px var(--error-glow) !important;
+        }
+
+        /* Alerts */
+        .alert {
+            border: none;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 25px;
+            position: relative;
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+
+        .alert-success {
+            background-color: rgba(0, 255, 136, 0.1);
+            border-left: 4px solid var(--success-color);
+            color: var(--success-color);
+        }
+
+        .btn-close-white {
+            filter: brightness(0) invert(1);
+            opacity: 0.7;
+        }
+
+            .btn-close-white:hover {
+                opacity: 1;
+            }
+
+        /* Responsive adjustments */
+        @@media (max-width: 767px) {
+            .form-continer-request {
+                padding: 20px;
+            }
+
+            .section-title {
+                font-size: 1.1rem;
+            }
+
+            .form-header-request h1 {
+                font-size: 1.6rem;
+            }
+
+            .form-header-request .substitle {
+                font-size: 0.95rem;
+            }
+
+            .security-badge {
+                font-size: 0.8rem;
+            }
+
+            .days-selector {
+                justify-content: center;
+            }
+
+            .day-label {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+        }
+
+        /* Animations */
+        @@keyframes glow {
+            0% {
+                box-shadow: 0 0 5px var(--primary-glow);
+            }
+
+            50% {
+                box-shadow: 0 0 20px var(--primary-glow);
+            }
+
+            100% {
+                box-shadow: 0 0 5px var(--primary-glow);
+            }
+        }
+
+        .animate-glow {
+            animation: glow 3s infinite;
+        }
+    </style>
+}
+
+<div class="background-pattern"></div>
+<div class="grid-overlay"></div>
+<div class="form-progress-bar" id="progressBar"></div>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+</div>
+
+<div class="container-request">
+    <div class="form-continer-request animate__animated animate__fadeIn">
+        <div class="form-header-request">
+            <h1><i class="fas fa-network-wired me-3"></i>Network Service Request</h1>
+            <p class="substitle">Network Infrastructure & Connectivity Solutions</p>
+
+            <div class="security-badge">
+                <i class="fas fa-shield-alt"></i>
+                <span>Secure • Professional • Reliable</span>
+            </div>
+        </div>
+        <div class="form-body-request">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @Html.ValidationSummary(false, "", new { @class = "validation-summary-errors" })
+
+            @using (Html.BeginForm("NetworkService", "Service", FormMethod.Post, new { enctype = "multipart/form-data", @class = "needs-validation", novalidate = "novalidate", id = "networkServiceForm" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.ServiceId)
+
+                <!-- Service Information -->
+                <div class="form-continer-request animate__animated animate__fadeInUp" data-section="1">
+                    <h3 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Service Information
+                    </h3>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-floating">
+                                @Html.DropDownListFor(m => m.RequestType, Html.GetEnumSelectList<NetworkRequestType>
+                                    (), "Select Request Type", new { @class = "form-select", required = "required" })
+                                    @Html.LabelFor(m => m.RequestType, "Request Type *")
+                                    @Html.ValidationMessageFor(m => m.RequestType, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="form-floating">
+                                @Html.DropDownListFor(m => m.Priority, Html.GetEnumSelectList<PriorityLevel>().Select(x => new SelectListItem { Value = x.Value, Text = x.Text }), "Select Priority Level", new { @class = "form-select", required = "required" })
+                                @Html.LabelFor(m => m.Priority, "Priority Level *")
+                                @Html.ValidationMessageFor(m => m.Priority, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        @Html.TextAreaFor(m => m.BusinessJustification, new { @class = "form-control", placeholder = "Business Justification", style = "height: 120px", required = "required", maxlength = "1000" })
+                        @Html.LabelFor(m => m.BusinessJustification, "Business Justification *")
+                        @Html.ValidationMessageFor(m => m.BusinessJustification, "", new { @class = "field-validation-error" })
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="form-continer-request animate__animated animate__fadeInUp animate__delay-1s" data-section="2">
+                    <h3 class="section-title">
+                        <i class="fas fa-user-shield"></i>
+                        Contact Information
+                    </h3>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-floating">
+                                @Html.TextBoxFor(m => m.PrimaryContactName, new { @class = "form-control", placeholder = "Full Name", required = "required", maxlength = "100" })
+                                @Html.LabelFor(m => m.PrimaryContactName, "Full Name *")
+                                @Html.ValidationMessageFor(m => m.PrimaryContactName, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="form-floating">
+                                @Html.TextBoxFor(m => m.PrimaryContactEmail, new { @class = "form-control", placeholder = "Email Address", @type = "email", required = "required", maxlength = "255" })
+                                @Html.LabelFor(m => m.PrimaryContactEmail, "Email Address *")
+                                @Html.ValidationMessageFor(m => m.PrimaryContactEmail, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-floating">
+                                @Html.TextBoxFor(m => m.PrimaryContactPhone, new { @class = "form-control", placeholder = "Phone Number", @type = "tel", maxlength = "20" })
+                                @Html.LabelFor(m => m.PrimaryContactPhone, "Phone Number")
+                                @Html.ValidationMessageFor(m => m.PrimaryContactPhone, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <div class="form-floating">
+                                @Html.TextBoxFor(m => m.Department, new { @class = "form-control", placeholder = "Department", required = "required", maxlength = "100" })
+                                @Html.LabelFor(m => m.Department, "Department *")
+                                @Html.ValidationMessageFor(m => m.Department, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Network Details -->
+                <div class="form-continer-request animate__animated animate__fadeInUp animate__delay-2s" data-section="3">
+                    <h3 class="section-title">
+                        <i class="fas fa-sitemap"></i>
+                        Network Details
+                    </h3>
+
+                    <div class="row">
+                        <div class="col-md-8 mb-4">
+                            <div class="form-floating">
+                                @Html.TextBoxFor(m => m.Location, new { @class = "form-control", placeholder = "Location/Building", required = "required", maxlength = "200" })
+                                @Html.LabelFor(m => m.Location, "Location/Building *")
+                                @Html.ValidationMessageFor(m => m.Location, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-4">
+                            <div class="form-floating">
+                                @Html.TextBoxFor(m => m.RoomNumber, new { @class = "form-control", placeholder = "Room/Office Number", maxlength = "50" })
+                                @Html.LabelFor(m => m.RoomNumber, "Room/Office Number")
+                                @Html.ValidationMessageFor(m => m.RoomNumber, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-4">
+                            <div class="form-floating">
+                                @Html.TextBoxFor(m => m.NumberOfPorts, new { @class = "form-control", placeholder = "Number of Ports", @type = "number", min = "1", max = "100" })
+                                @Html.LabelFor(m => m.NumberOfPorts, "Number of Network Ports")
+                                @Html.ValidationMessageFor(m => m.NumberOfPorts, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-4">
+                            <div class="form-floating">
+                                @Html.DropDownListFor(m => m.PortType, Html.GetEnumSelectList<NetworkPortType>().Select(x => new SelectListItem { Value = x.Value, Text = x.Text }), "Select Port Type", new { @class = "form-select" })
+                                @Html.LabelFor(m => m.PortType, "Network Port Type")
+                                @Html.ValidationMessageFor(m => m.PortType, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-4">
+                            <div class="form-floating">
+                                @Html.DropDownListFor(m => m.NetworkSpeed, Html.GetEnumSelectList<NetworkSpeed>().Select(x => new SelectListItem { Value = x.Value, Text = x.Text }), "Select Network Speed", new { @class = "form-select" })
+                                @Html.LabelFor(m => m.NetworkSpeed, "Network Speed Required")
+                                @Html.ValidationMessageFor(m => m.NetworkSpeed, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        @Html.TextBoxFor(m => m.VlanAssignment, new { @class = "form-control", placeholder = "VLAN Assignment", maxlength = "100" })
+                        @Html.LabelFor(m => m.VlanAssignment, "VLAN Assignment")
+                        @Html.ValidationMessageFor(m => m.VlanAssignment, "", new { @class = "field-validation-error" })
+                    </div>
+                </div>
+
+                <!-- Access and Security -->
+                <div class="form-continer-request animate__animated animate__fadeInUp animate__delay-3s" data-section="4">
+                    <h3 class="section-title">
+                        <i class="fas fa-wifi"></i>
+                        Access and Security
+                    </h3>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-check">
+                                @Html.CheckBoxFor(m => m.WirelessAccessRequired, new { @class = "form-check-input", id = "wirelessAccess" })
+                                @Html.LabelFor(m => m.WirelessAccessRequired, "Wireless Access Required", new { @class = "form-check-label", @for = "wirelessAccess" })
+                            </div>
+
+                            <div class="form-floating" id="networkNameDiv" style="display: none;">
+                                @Html.TextBoxFor(m => m.NetworkName, new { @class = "form-control", placeholder = "Network Name (SSID)", maxlength = "100" })
+                                @Html.LabelFor(m => m.NetworkName, "Network Name (SSID)")
+                                @Html.ValidationMessageFor(m => m.NetworkName, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="form-check">
+                                @Html.CheckBoxFor(m => m.SpecialSecurityRequired, new { @class = "form-check-input", id = "specialSecurity" })
+                                @Html.LabelFor(m => m.SpecialSecurityRequired, "Special Security Requirements", new { @class = "form-check-label", @for = "specialSecurity" })
+                            </div>
+
+                            <div class="form-floating" id="securityDetailsDiv" style="display: none;">
+                                @Html.TextAreaFor(m => m.SecurityRequirementsDetails, new { @class = "form-control", placeholder = "Security Requirements Details", style = "height: 100px", maxlength = "500" })
+                                @Html.LabelFor(m => m.SecurityRequirementsDetails, "Security Requirements Details")
+                                @Html.ValidationMessageFor(m => m.SecurityRequirementsDetails, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Equipment and Hardware -->
+                <div class="form-continer-request animate__animated animate__fadeInUp animate__delay-4s" data-section="5">
+                    <h3 class="section-title">
+                        <i class="fas fa-server"></i>
+                        Equipment and Hardware
+                    </h3>
+
+                    <div class="form-floating mb-4">
+                        @Html.TextAreaFor(m => m.EquipmentDetails, new { @class = "form-control", placeholder = "Equipment to be Connected", style = "height: 100px", maxlength = "500" })
+                        @Html.LabelFor(m => m.EquipmentDetails, "Equipment to be Connected")
+                        @Html.ValidationMessageFor(m => m.EquipmentDetails, "", new { @class = "field-validation-error" })
+                    </div>
+
+                    <div class="form-check mb-3">
+                        @Html.CheckBoxFor(m => m.HardwareInstallationRequired, new { @class = "form-check-input", id = "hardwareInstallation" })
+                        @Html.LabelFor(m => m.HardwareInstallationRequired, "Hardware Installation Required", new { @class = "form-check-label", @for = "hardwareInstallation" })
+                    </div>
+
+                    <div class="form-floating" id="hardwareDetailsDiv" style="display: none;">
+                        @Html.TextAreaFor(m => m.HardwareDetails, new { @class = "form-control", placeholder = "Hardware Details", style = "height: 100px", maxlength = "500" })
+                        @Html.LabelFor(m => m.HardwareDetails, "Hardware Details")
+                        @Html.ValidationMessageFor(m => m.HardwareDetails, "", new { @class = "field-validation-error" })
+                    </div>
+                </div>
+
+                <!-- Timing and Scheduling -->
+                <div class="form-continer-request animate__animated animate__fadeInUp animate__delay-5s" data-section="6">
+                    <h3 class="section-title">
+                        <i class="fas fa-calendar-alt"></i>
+                        Timing and Scheduling
+                    </h3>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-floating">
+                                @Html.TextBoxFor(m => m.RequestedCompletionDate, new { @class = "form-control", @type = "date" })
+                                @Html.LabelFor(m => m.RequestedCompletionDate, "Requested Completion Date")
+                                @Html.ValidationMessageFor(m => m.RequestedCompletionDate, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="form-floating">
+                                @Html.DropDownListFor(m => m.PreferredInstallationTime, Html.GetEnumSelectList<PreferredTime>().Select(x => new SelectListItem { Value = x.Value, Text = x.Text }), "Select Preferred Time", new { @class = "form-select" })
+                                @Html.LabelFor(m => m.PreferredInstallationTime, "Preferred Installation Time")
+                                @Html.ValidationMessageFor(m => m.PreferredInstallationTime, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-check">
+                                @Html.CheckBoxFor(m => m.IsUrgent, new { @class = "form-check-input", id = "isUrgent" })
+                                @Html.LabelFor(m => m.IsUrgent, "Is this request urgent?", new { @class = "form-check-label", @for = "isUrgent" })
+                            </div>
+
+                            <div class="form-floating" id="urgencyDiv" style="display: none;">
+                                @Html.TextAreaFor(m => m.UrgencyJustification, new { @class = "form-control", placeholder = "Urgency Justification", style = "height: 100px", maxlength = "500" })
+                                @Html.LabelFor(m => m.UrgencyJustification, "Urgency Justification")
+                                @Html.ValidationMessageFor(m => m.UrgencyJustification, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label">Available Days:</label>
+                            <div class="days-selector">
+                                @foreach (DayOfWeek day in Enum.GetValues(typeof(DayOfWeek)))
+                                {
+                                    <input type="checkbox" name="AvailableDays" value="@((int)day)" id="day_@((int)day)" class="day-checkbox">
+                                    <label for="day_@((int)day)" class="day-label">@day.ToString().Substring(0, 3)</label>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Supporting Documents -->
+                <div class="form-continer-request animate__animated animate__fadeInUp animate__delay-6s" data-section="7">
+                    <h3 class="section-title">
+                        <i class="fas fa-file-upload"></i>
+                        Supporting Documents
+                    </h3>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-4">
+                            <label class="form-label">Network Diagram</label>
+                            <div class="file-upload-area" onclick="document.getElementById('networkDiagram').click()">
+                                <i class="fas fa-project-diagram"></i>
+                                <h6>Network Diagram</h6>
+                                <input type="file" id="networkDiagram" name="NetworkDiagram" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style="display: none;">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-4">
+                            <label class="form-label">Floor Plan</label>
+                            <div class="file-upload-area" onclick="document.getElementById('floorPlan').click()">
+                                <i class="fas fa-map"></i>
+                                <h6>Floor Plan</h6>
+                                <input type="file" id="floorPlan" name="FloorPlan" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style="display: none;">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-4">
+                            <label class="form-label">Additional Documents</label>
+                            <div class="file-upload-area" onclick="document.getElementById('additionalDocuments').click()">
+                                <i class="fas fa-file-upload"></i>
+                                <h6>Additional Files</h6>
+                                <input type="file" id="additionalDocuments" name="AdditionalDocuments" multiple accept=".pdf,.doc,.docx,.txt" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="fileList" class="mt-3"></div>
+                </div>
+
+                <!-- Approval and Authorization -->
+                <div class="form-continer-request animate__animated animate__fadeInUp animate__delay-7s" data-section="8">
+                    <h3 class="section-title">
+                        <i class="fas fa-user-check"></i>
+                        Approval and Authorization
+                    </h3>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-floating">
+                                @Html.TextBoxFor(m => m.ManagerName, new { @class = "form-control", placeholder = "Manager/Supervisor Name", maxlength = "100" })
+                                @Html.LabelFor(m => m.ManagerName, "Manager/Supervisor Name")
+                                @Html.ValidationMessageFor(m => m.ManagerName, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="form-floating">
+                                @Html.TextBoxFor(m => m.ManagerEmail, new { @class = "form-control", placeholder = "Manager Email", @type = "email", maxlength = "255" })
+                                @Html.LabelFor(m => m.ManagerEmail, "Manager Email")
+                                @Html.ValidationMessageFor(m => m.ManagerEmail, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-floating">
+                                @Html.TextBoxFor(m => m.BudgetCode, new { @class = "form-control", placeholder = "Budget Code/Account", maxlength = "50" })
+                                @Html.LabelFor(m => m.BudgetCode, "Budget Code/Account")
+                                @Html.ValidationMessageFor(m => m.BudgetCode, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="form-check mt-4">
+                                @Html.CheckBoxFor(m => m.AcknowledgeApproval, new { @class = "form-check-input", id = "acknowledgeApproval", required = "required" })
+                                @Html.LabelFor(m => m.AcknowledgeApproval, "I acknowledge that this request may require approval *", new { @class = "form-check-label", @for = "acknowledgeApproval" })
+                                @Html.ValidationMessageFor(m => m.AcknowledgeApproval, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Notes -->
+                <div class="form-continer-request animate__animated animate__fadeInUp animate__delay-8s" data-section="9">
+                    <h3 class="section-title">
+                        <i class="fas fa-comment-dots"></i>
+                        Additional Notes
+                    </h3>
+
+                    <div class="form-floating mb-3">
+                        @Html.TextAreaFor(m => m.AdditionalNotes, new { @class = "form-control", placeholder = "Additional Notes", style = "height: 120px", maxlength = "1000" })
+                        @Html.LabelFor(m => m.AdditionalNotes, "Additional Notes or Special Requirements")
+                        @Html.ValidationMessageFor(m => m.AdditionalNotes, "", new { @class = "field-validation-error" })
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center mt-5">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-paper-plane me-2"></i>
+                        Submit Network Request
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Progress bar functionality
+            function updateProgress() {
+                const sections = $('[data-section]');
+                const filledSections = sections.filter(function () {
+                    const inputs = $(this).find('input[required], select[required], textarea[required]');
+                    return inputs.filter(function () {
+                        return $(this).val().trim() !== '';
+                    }).length === inputs.length;
+                });
+
+                const progress = (filledSections.length / sections.length) * 100;
+                $('#progressBar').css('width', progress + '%');
+            }
+
+            // Update progress on input change
+            $('input, select, textarea').on('input change', updateProgress);
+
+            // Initial progress update
+            updateProgress();
+
+            // Conditional field visibility
+            $('#WirelessAccessRequired').on('change', function () {
+                if ($(this).is(':checked')) {
+                    $('#networkNameDiv').slideDown();
+                } else {
+                    $('#networkNameDiv').slideUp();
+                    $('#NetworkName').val('');
+                }
+            });
+
+            $('#SpecialSecurityRequired').on('change', function () {
+                if ($(this).is(':checked')) {
+                    $('#securityDetailsDiv').slideDown();
+                } else {
+                    $('#securityDetailsDiv').slideUp();
+                    $('#SecurityRequirementsDetails').val('');
+                }
+            });
+
+            $('#HardwareInstallationRequired').on('change', function () {
+                if ($(this).is(':checked')) {
+                    $('#hardwareDetailsDiv').slideDown();
+                } else {
+                    $('#hardwareDetailsDiv').slideUp();
+                    $('#HardwareDetails').val('');
+                }
+            });
+
+            $('#IsUrgent').on('change', function () {
+                if ($(this).is(':checked')) {
+                    $('#urgencyDiv').slideDown();
+                } else {
+                    $('#urgencyDiv').slideUp();
+                    $('#UrgencyJustification').val('');
+                }
+            });
+
+            // Date validation
+            const today = new Date().toISOString().split('T')[0];
+            $('#RequestedCompletionDate').attr('min', today);
+
+            // File upload handling
+            function handleFileUpload(inputId, displayArea) {
+                $(`#${inputId}`).on('change', function (e) {
+                    const files = e.target.files;
+                    if (files.length > 0) {
+                        const fileName = files[0].name;
+                        const fileSize = (files[0].size / 1024).toFixed(1);
+                        const fileInfo = $(`
+                                <div class="file-info mt-2">
+                                    <i class="fas fa-file me-2 text-primary"></i>
+                                    <span>${fileName}</span>
+                                    <small class="text-muted">(${fileSize} KB)</small>
+                                </div>
+                            `);
+                        $(this).closest('.file-upload-area').after(fileInfo);
+                    }
+                });
+            }
+
+            // Initialize file upload handlers
+            handleFileUpload('networkDiagram');
+            handleFileUpload('floorPlan');
+            handleFileUpload('additionalDocuments');
+
+            // Form submission
+            $('#networkServiceForm').on('submit', function (e) {
+                const form = $(this);
+                const submitBtn = $('#submitBtn');
+                const loadingOverlay = $('#loadingOverlay');
+
+                // Basic client-side validation
+                let isValid = true;
+                const requiredFields = form.find('[required]');
+
+                requiredFields.each(function () {
+                    if (!$(this).val().trim()) {
+                        $(this).addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    showNotification('Please fill in all required fields', 'error');
+                    return false;
+                }
+
+                // Show loading state
+                loadingOverlay.addClass('active');
+                submitBtn.prop('disabled', true);
+                submitBtn.html('<i class="fas fa-spinner fa-spin me-2"></i>Processing Request...');
+
+                // Form will submit naturally
+            });
+
+            // Notification system
+            function showNotification(message, type) {
+                const alertClass = type === 'error' ? 'alert-danger' :
+                    type === 'warning' ? 'alert-warning' :
+                        'alert-success';
+
+                const notification = $(`
+                        <div class="alert ${alertClass} alert-dismissible fade show position-fixed"
+                             style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                            <i class="fas fa-${type === 'error' ? 'exclamation-triangle' :
+                        type === 'warning' ? 'exclamation-circle' :
+                            'check-circle'} me-2"></i>
+                            ${message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `);
+
+                $('body').append(notification);
+
+                // Auto-remove after 5 seconds
+                setTimeout(function () {
+                    notification.alert('close');
+                }, 5000);
+            }
+
+            // Initialize tooltips
+            $('[data-bs-toggle="tooltip"]').tooltip();
+
+            // Smooth scroll to validation errors
+            if ($('.field-validation-error:visible').length > 0) {
+                const firstError = $('.field-validation-error:visible').first();
+                $('html, body').animate({
+                    scrollTop: firstError.closest('.form-continer-request').offset().top - 100
+                }, 500);
+            }
+        });
+    </script>
+}

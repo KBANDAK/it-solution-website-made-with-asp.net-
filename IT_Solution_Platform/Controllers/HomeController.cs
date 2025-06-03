@@ -22,11 +22,16 @@ namespace IT_Solution_Platform.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public ActionResult Services()
         {
-            ViewBag.Message = "Your services page.";
+            // Check if user is authenticated
+            if (!User.Identity.IsAuthenticated)
+            {
+                ViewBag.ErrorMessage = "You must be logged in to access the services page.";
+                return View("Error");
+            }
 
+            ViewBag.Message = "Your services page.";
             return View();
         }
 

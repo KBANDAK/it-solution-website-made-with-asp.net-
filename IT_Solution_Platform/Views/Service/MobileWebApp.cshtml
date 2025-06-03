@@ -1,0 +1,900 @@
+﻿@model IT_Solution_Platform.Models.MobileWebAppRequestViewModel
+
+@{
+    ViewBag.Title = "Mobile & Web Application Request";
+}
+
+@section Styles {
+    <!-- Reuse the same styles as PenTesting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* PenTesting Request Styles */
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Background elements */
+        .background-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(var(--primary-glow) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.1;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(to right, var(--border-light) 1px, transparent 1px), linear-gradient(to bottom, var(--border-light) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.3;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .form-progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            width: 0%;
+            transition: var(--transition);
+            z-index: 1010;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--glass-strong);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition-fast);
+        }
+
+            .loading-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid transparent;
+            border-top: 3px solid var(--primary-color);
+            border-right: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        @@keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Container styles */
+        .container-request {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .form-continer-request {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--box-shadow);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+            .form-continer-request:hover {
+                transform: translateY(-5px);
+                box-shadow: var(--hover-shadow);
+                border-color: var(--border-hover);
+            }
+
+            .form-continer-request:before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 3px;
+                height: 100%;
+                background: linear-gradient(to bottom, var(--primary-color), var(--accent-color));
+                box-shadow: 0 0 20px var(--primary-glow);
+            }
+
+        .form-header-request {
+            text-align: center;
+            margin-bottom: 35px;
+            position: relative;
+        }
+
+            .form-header-request h1 {
+                font-family: 'JetBrains Mono', monospace;
+                font-weight: 600;
+                color: var(--text-bright);
+                margin-bottom: 10px;
+                letter-spacing: 1px;
+            }
+
+            .form-header-request .substitle {
+                color: var(--text-secondary);
+                font-size: 1.1rem;
+                margin-bottom: 20px;
+            }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            background-color: var(--section-bg);
+            border-radius: 30px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-light);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            margin-top: 15px;
+        }
+
+            .security-badge i {
+                margin-right: 8px;
+                color: var(--primary-color);
+            }
+
+        /* Section styling */
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            font-size: 1.25rem;
+            color: var(--text-bright);
+            margin-bottom: 25px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+            .section-title i {
+                margin-right: 12px;
+                color: var(--primary-color);
+                font-size: 1.1em;
+            }
+
+        /* Form controls */
+        .form-floating .form-control,
+        .form-floating .form-select {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            border-radius: 8px;
+            height: 58px;
+            box-shadow: none;
+            transition: var(--transition-fast);
+        }
+
+            .form-floating .form-control:focus,
+            .form-floating .form-select:focus {
+                border-color: var(--border-focus);
+                box-shadow: 0 0 0 3px var(--primary-glow);
+                background-color: rgba(21, 26, 40, 0.9);
+            }
+
+        .form-floating textarea.form-control {
+            height: 120px;
+        }
+
+        .form-floating label {
+            color: var(--text-secondary);
+            padding-left: 12px;
+            font-weight: 500;
+        }
+
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label,
+        .form-floating > .form-select ~ label {
+            color: var(--primary-dim);
+            opacity: 0.9;
+            transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+        }
+
+        /* File upload area */
+        .file-upload-area {
+            border: 2px dashed var(--border-light);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            background-color: var(--input-bg);
+        }
+
+            .file-upload-area:hover {
+                border-color: var(--primary-dim);
+                background-color: rgba(21, 26, 40, 0.8);
+            }
+
+            .file-upload-area i {
+                font-size: 2.5rem;
+                color: var(--primary-color);
+                margin-bottom: 15px;
+                display: block;
+            }
+
+            .file-upload-area h5 {
+                color: var(--text-bright);
+                margin-bottom: 10px;
+                font-family: 'JetBrains Mono', monospace;
+            }
+
+            .file-upload-area p {
+                color: var(--text-secondary);
+                font-size: 0.9rem;
+                margin-bottom: 0;
+            }
+
+        #fileList {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            background-color: var(--section-bg);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+        }
+
+            .file-item i {
+                margin-right: 8px;
+                color: var(--primary-color);
+            }
+
+        .remove-file {
+            margin-left: 8px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+            .remove-file:hover {
+                color: var(--error-color);
+            }
+
+        /* Submit button */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dim));
+            border: none;
+            color: var(--dark-bg);
+            padding: 12px 30px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            border-radius: 30px;
+            letter-spacing: 0.5px;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-fast);
+            box-shadow: 0 5px 15px var(--primary-glow);
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px var(--primary-glow);
+            }
+
+            .btn-primary:active {
+                transform: translateY(1px);
+            }
+
+            .btn-primary::after {
+                content: '';
+                position: absolute;
+                top: -50%;
+                right: -50%;
+                bottom: -50%;
+                left: -50%;
+                background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0));
+                transform: rotate(30deg) translate(-100%, 0);
+                opacity: 0;
+                transition: var(--transition);
+            }
+
+            .btn-primary:hover::after {
+                transform: rotate(30deg) translate(100%, 0);
+                opacity: 0.6;
+                transition: var(--transition-long);
+            }
+
+        /* Validation styling */
+        .field-validation-error {
+            color: var(--error-color);
+            font-size: 0.85rem;
+            display: block;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        .validation-summary-errors {
+            background-color: rgba(255, 68, 68, 0.1);
+            border: 1px solid var(--error-color);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            color: var(--error-color);
+        }
+
+            .validation-summary-errors ul {
+                margin-bottom: 0;
+                padding-left: 20px;
+            }
+
+        .is-invalid {
+            border-color: var(--error-color) !important;
+            box-shadow: 0 0 0 3px var(--error-glow) !important;
+        }
+
+        /* Alerts */
+        .alert {
+            border: none;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 25px;
+            position: relative;
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+
+        .alert-success {
+            background-color: rgba(0, 255, 136, 0.1);
+            border-left: 4px solid var(--success-color);
+            color: var(--success-color);
+        }
+
+        .btn-close-white {
+            filter: brightness(0) invert(1);
+            opacity: 0.7;
+        }
+
+            .btn-close-white:hover {
+                opacity: 1;
+            }
+
+        /* Responsive adjustments */
+        @@media (max-width: 767px) {
+            .form-continer-request {
+                padding: 20px;
+            }
+
+            .section-title {
+                font-size: 1.1rem;
+            }
+
+            .form-header-request h1 {
+                font-size: 1.6rem;
+            }
+
+            .form-header-request .substitle {
+                font-size: 0.95rem;
+            }
+
+            .security-badge {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Animations */
+        @@keyframes glow {
+            0% {
+                box-shadow: 0 0 5px var(--primary-glow);
+            }
+
+            50% {
+                box-shadow: 0 0 20px var(--primary-glow);
+            }
+
+            100% {
+                box-shadow: 0 0 5px var(--primary-glow);
+            }
+        }
+
+        .animate-glow {
+            animation: glow 3s infinite;
+        }
+    </style>
+}
+
+<div class="background-pattern"></div>
+<div class="grid-overlay"></div>
+<div class="form-progress-bar" id="progressBar"></div>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+</div>
+
+<div class="container-request">
+    <div class="form-continer-request animate_animated animate__fadeIn">
+        <div class="form-header-request">
+            <h1><i class="fas fa-mobile-alt me-3"></i>Mobile & Web App Request</h1>
+            <p class="substitle">Custom Development for Web and Mobile Solutions</p>
+
+            <div class="security-badge">
+                <i class="fas fa-lock"></i>
+                <span>Secure • Confidential • Professional</span>
+            </div>
+        </div>
+        <div class="form-body-request">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle m-2"></i>
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @Html.ValidationSummary(false, "", new { @class = "validation-summary-errors" })
+
+            @using (Html.BeginForm("MobileWebApp", "Service", FormMethod.Post, new { enctype = "multipart/form-data", @class = "needs-validation", novalidate = "novalidate", id = "mobileWebAppForm" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.ServiceId)
+
+                <!-- Project Information -->
+                <div class="form-continer-request animate__animated animate__fadeInUp" data-section="1">
+                    <h3 class="section-title">
+                        <i class="fas fa-project-diagram"></i>
+                        Project Information
+                    </h3>
+
+                    <div class="form-floating mb-4">
+                        @Html.TextBoxFor(m => m.ProjectName, new { @class = "form-control", placeholder = "Project Name", required = "required", maxlength = "100" })
+                        @Html.LabelFor(m => m.ProjectName, "Project Name *")
+                        @Html.ValidationMessageFor(m => m.ProjectName, "", new { @class = "field-validation-error" })
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        @Html.TextAreaFor(m => m.ProjectDescription, new { @class = "form-control", placeholder = "Project Description", style = "height: 120px", required = "required", maxlength = "2000" })
+                        @Html.LabelFor(m => m.ProjectDescription, "Project Description *")
+                        @Html.ValidationMessageFor(m => m.ProjectDescription, "", new { @class = "field-validation-error" })
+                    </div>
+                </div>
+
+                <!-- Development Requirements -->
+                <div class="form-continer-request animate__animated animate__fadeInUp animate__delay-1s" data-section="2">
+                    <h3 class="section-title">
+                        <i class="fas fa-code"></i>
+                        Development Requirements
+                    </h3>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-floating">
+                                @Html.DropDownListFor(m => m.Platform, new SelectList(new[] {
+                                    new { Value = "", Text = "Select Platform" },
+                                    new { Value = "web", Text = "Web Application" },
+                                    new { Value = "mobile-ios", Text = "Mobile (iOS)" },
+                                    new { Value = "mobile-android", Text = "Mobile (Android)" },
+                                    new { Value = "cross-platform", Text = "Cross-Platform (iOS & Android)" },
+                                    new { Value = "web-mobile", Text = "Web & Mobile" }
+                                }, "Value", "Text"), new { @class = "form-select", required = "required" })
+                                @Html.LabelFor(m => m.Platform, "Platform *")
+                                @Html.ValidationMessageFor(m => m.Platform, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="form-floating">
+                                @Html.DropDownListFor(m => m.DevelopmentType, new SelectList(new[] {
+                                    new { Value = "", Text = "Select Development Type" },
+                                    new { Value = "new-development", Text = "New Development" },
+                                    new { Value = "enhancement", Text = "Enhancement/Upgrade" },
+                                    new { Value = "maintenance", Text = "Maintenance/Support" }
+                                }, "Value", "Text"), new { @class = "form-select", required = "required" })
+                                @Html.LabelFor(m => m.DevelopmentType, "Development Type *")
+                                @Html.ValidationMessageFor(m => m.DevelopmentType, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-floating">
+                                @Html.TextBoxFor(m => m.PreferredStartDate, new { @class = "form-control", @type = "date" })
+                                @Html.LabelFor(m => m.PreferredStartDate, "Preferred Start Date")
+                                @Html.ValidationMessageFor(m => m.PreferredStartDate, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <div class="form-floating">
+                                @Html.TextBoxFor(m => m.PreferredEndDate, new { @class = "form-control", @type = "date" })
+                                @Html.LabelFor(m => m.PreferredEndDate, "Preferred End Date")
+                                @Html.ValidationMessageFor(m => m.PreferredEndDate, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="form-continer-request animate__animated animate__fadeInUp animate__delay-2s" data-section="3">
+                    <h3 class="section-title">
+                        <i class="fas fa-user-shield"></i>
+                        Contact Information
+                    </h3>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-floating">
+                                @Html.TextBoxFor(m => m.PrimaryContactName, new { @class = "form-control", placeholder = "Full Name", required = "required", maxlength = "100" })
+                                @Html.LabelFor(m => m.PrimaryContactName, "Full Name *")
+                                @Html.ValidationMessageFor(m => m.PrimaryContactName, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="form-floating">
+                                @Html.TextBoxFor(m => m.PrimaryContactEmail, new { @class = "form-control", placeholder = "Email Address", @type = "email", required = "required", maxlength = "255" })
+                                @Html.LabelFor(m => m.PrimaryContactEmail, "Email Address *")
+                                @Html.ValidationMessageFor(m => m.PrimaryContactEmail, "", new { @class = "field-validation-error" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        @Html.TextBoxFor(m => m.PrimaryContactPhone, new { @class = "form-control", placeholder = "Phone Number", @type = "tel", maxlength = "20" })
+                        @Html.LabelFor(m => m.PrimaryContactPhone, "Phone Number")
+                        @Html.ValidationMessageFor(m => m.PrimaryContactPhone, "", new { @class = "field-validation-error" })
+                    </div>
+                </div>
+
+                <!-- Supporting Documents -->
+                <div class="form-continer-request animate__animated animate__fadeInUp animate__delay-3s" data-section="4">
+                    <h3 class="section-title">
+                        <i class="fas fa-file-code"></i>
+                        Supporting Documents
+                    </h3>
+
+                    <div class="file-upload-area" onclick="document.getElementById('supportingDocuments').click()" role="button" tabindex="0" aria-label="Click to upload files">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h5>Upload Documents</h5>
+                        <p>
+                            Drag & drop files here or click to browse<br>
+                            <small>Supported: PDF, DOC, DOCX, TXT • Max 5MB each</small>
+                        </p>
+                        <input type="file" id="supportingDocuments" name="SupportingDocuments" multiple accept=".pdf,.doc,.docx,.txt" style="display: none;" aria-label="Upload supporting documents">
+                    </div>
+                    <div id="fileList" class="mt-3"></div>
+                </div>
+
+                <!-- Additional Notes -->
+                <div class="form-continer-request animate__animated animate__fadeInUp animate__delay-4s" data-section="5">
+                    <h3 class="section-title">
+                        <i class="fas fa-comment-dots"></i>
+                        Additional Notes
+                    </h3>
+
+                    <div class="form-floating mb-3">
+                        @Html.TextAreaFor(m => m.AdditionalNotes, new { @class = "form-control", placeholder = "Additional Notes", style = "height: 120px", maxlength = "1000" })
+                        @Html.LabelFor(m => m.AdditionalNotes, "Additional Notes or Special Requirements")
+                        @Html.ValidationMessageFor(m => m.AdditionalNotes, "", new { @class = "field-validation-error" })
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center mt-5">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-paper-plane me-2"></i>
+                        Submit Request
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Reuse the same scripts as PenTesting -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // (Paste the same JavaScript from the PenTesting view here, updating form ID to "mobileWebAppForm")
+            // Progress bar functionality
+            function updateProgress() {
+                const sections = $('.form-section');
+                const filledSections = sections.filter(function () {
+                    const inputs = $(this).find('input[required], select[required], textarea[required]');
+                    return inputs.filter(function () {
+                        return $(this).val().trim() !== '';
+                    }).length === inputs.length;
+                });
+
+                const progress = (filledSections.length / sections.length) * 100;
+                $('#progressBar').css('width', progress + '%');
+            }
+
+            // Update progress on input change
+            $('input, select, textarea').on('input change', updateProgress);
+
+            // Initial progress update
+            updateProgress();
+
+            // Enhanced date validation
+            const today = new Date().toISOString().split('T')[0];
+            $('#PreferredStartDate').attr('min', today);
+            $('#PreferredEndDate').attr('min', today);
+
+            $('#PreferredStartDate').on('change', function () {
+                const startDate = $(this).val();
+                $('#PreferredEndDate').attr('min', startDate);
+
+                const endDate = $('#PreferredEndDate').val();
+                if (endDate && endDate < startDate) {
+                    $('#PreferredEndDate').val('');
+                    showNotification('End date must be after start date', 'warning');
+                }
+                updateProgress();
+            });
+
+            // Enhanced file upload with drag & drop
+            const fileUploadArea = $('.file-upload-area');
+            const fileInput = $('#supportingDocuments');
+            const fileList = $('#fileList');
+
+            // Drag and drop functionality
+            fileUploadArea.on('dragover dragenter', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).addClass('drag-over');
+            });
+
+            fileUploadArea.on('dragleave dragend', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).removeClass('drag-over');
+            });
+
+            fileUploadArea.on('drop', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).removeClass('drag-over');
+
+                const files = e.originalEvent.dataTransfer.files;
+                handleFiles(files);
+            });
+
+            // Keyboard accessibility for file upload
+            fileUploadArea.on('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    fileInput.click();
+                }
+            });
+
+            // File input change
+            fileInput.on('change', function (e) {
+                handleFiles(e.target.files);
+            });
+
+            function handleFiles(files) {
+                if (files.length === 0) return;
+
+                // Validate files
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                const allowedTypes = ['.pdf', '.doc', '.docx', '.txt'];
+                let validFiles = [];
+
+                Array.from(files).forEach(function (file) {
+                    const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+
+                    if (!allowedTypes.includes(fileExtension)) {
+                        showNotification(`File type not allowed: ${file.name}`, 'error');
+                        return;
+                    }
+
+                    if (file.size > maxSize) {
+                        showNotification(`File too large: ${file.name} (Max 5MB)`, 'error');
+                        return;
+                    }
+
+                    validFiles.push(file);
+                });
+
+                if (validFiles.length > 0) {
+                    displayFileList(validFiles);
+                    showNotification(`${validFiles.length} file(s) selected successfully`, 'success');
+                }
+            }
+
+            function displayFileList(files) {
+                fileList.empty();
+
+                if (files.length > 0) {
+                    const listGroup = $('<div class="list-group"></div>');
+
+                    Array.from(files).forEach(function (file, index) {
+                        const fileSize = (file.size / 1024).toFixed(1);
+                        const fileIcon = getFileIcon(file.name);
+
+                        const listItem = $(`
+                            <div class="list-group-item d-flex justify-content-between align-items-center animate__animated animate__fadeInLeft" style="animation-delay: ${index * 0.1}s">
+                                <div class="d-flex align-items-center">
+                                    <i class="${fileIcon} me-3 text-primary"></i>
+                                    <div>
+                                        <strong class="file-name">${file.name}</strong>
+                                        <small class="text-muted d-block">${fileSize} KB • ${file.type || 'Unknown type'}</small>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge">Ready</span>
+                                    <button type="button" class="btn btn-sm btn-outline-danger remove-file" data-index="${index}">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `);
+
+                        listGroup.append(listItem);
+                    });
+
+                    fileList.append(listGroup);
+                }
+            }
+
+            function getFileIcon(filename) {
+                const extension = filename.split('.').pop().toLowerCase();
+                switch (extension) {
+                    case 'pdf': return 'fas fa-file-pdf';
+                    case 'doc':
+                    case 'docx': return 'fas fa-file-word';
+                    case 'txt': return 'fas fa-file-alt';
+                    default: return 'fas fa-file';
+                }
+            }
+
+            // Remove file functionality
+            $(document).on('click', '.remove-file', function () {
+                const index = $(this).data('index');
+                $(this).closest('.list-group-item').remove();
+
+                // Update file input (this is tricky with file inputs, so we'll clear it)
+                if ($('.list-group-item').length === 0) {
+                    fileInput.val('');
+                    fileList.empty();
+                }
+            });
+
+            // Form submission with enhanced loading state
+            $('#mobileWebAppForm').on('submit', function (e) {
+                const form = $(this);
+                const submitBtn = $('#submitBtn');
+                const loadingOverlay = $('#loadingOverlay');
+
+                // Basic client-side validation
+                let isValid = true;
+                const requiredFields = form.find('[required]');
+
+                requiredFields.each(function () {
+                    if (!$(this).val().trim()) {
+                        $(this).addClass('input-validation-error');
+                        isValid = false;
+                    } else {
+                        $(this).removeClass('input-validation-error');
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    showNotification('Please fill in all required fields', 'error');
+                    return false;
+                }
+
+                // Show loading state
+                loadingOverlay.css('display', 'flex');
+                submitBtn.prop('disabled', true);
+                submitBtn.html('<i class="fas fa-spinner fa-spin me-2"></i>Processing Request...');
+
+                // Simulate network delay for better UX (remove in production)
+                setTimeout(function () {
+                    // Form will submit naturally after this
+                }, 1000);
+            });
+
+            // Notification system
+            function showNotification(message, type) {
+                const alertClass = type === 'error' ? 'alert-danger' :
+                    type === 'warning' ? 'alert-warning' :
+                        'alert-success';
+
+                const notification = $(`
+                    <div class="alert ${alertClass} alert-dismissible fade show position-fixed"
+                         style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                        <i class="fas fa-${type === 'error' ? 'exclamation-triangle' :
+                        type === 'warning' ? 'exclamation-circle' :
+                            'check-circle'} me-2"></i>
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `);
+
+                $('body').append(notification);
+
+                // Auto-remove after 5 seconds
+                setTimeout(function () {
+                    notification.alert('close');
+                }, 5000);
+            }
+
+            // Enhanced form interactions
+            $('.form-control, .form-select').on('focus', function () {
+                $(this).closest('.form-section').addClass('focused-section');
+            });
+
+            $('.form-control, .form-select').on('blur', function () {
+                $(this).closest('.form-section').removeClass('focused-section');
+            });
+
+            // Smooth scroll to validation errors
+            if ($('.field-validation-error:visible').length > 0) {
+                const firstError = $('.field-validation-error:visible').first();
+                $('html, body').animate({
+                    scrollTop: firstError.closest('.form-section').offset().top - 100
+                }, 500);
+            }
+
+            // Add CSS for drag over state
+            $('<style>').prop('type', 'text/css').html(`
+                .file-upload-area.drag-over {
+                    border-color: var(--primary-color) !important;
+                    background: rgba(0, 229, 255, 0.1) !important;
+                    transform: scale(1.02);
+                }
+                .focused-section {
+                    box-shadow: 0 0 30px var(--primary-glow) !important;
+                }
+            `).appendTo('head');
+
+            // Initialize tooltips if needed
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+    </script>
+}

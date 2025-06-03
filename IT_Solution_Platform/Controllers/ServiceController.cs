@@ -16,13 +16,13 @@ namespace IT_Solution_Platform.Controllers
     public class ServiceController : Controller
     {
         private readonly SupabaseDatabase _databaseService;
-        private readonly SupabaseAuthService _authService;
         private readonly ServiceRequestService _serviceRequestService;
         private readonly AuditLogService _logService;
 
         // Constructor without Supabase Client injection
         public ServiceController(ServiceRequestService serviceRequestService, SupabaseDatabase databaseService, SupabaseAuthService authService, AuditLogService logService) 
         {
+            _databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
             _serviceRequestService = serviceRequestService ?? throw new ArgumentNullException(nameof(serviceRequestService));
             _logService = logService ?? throw new ArgumentNullException(nameof(logService));
         }
@@ -38,12 +38,18 @@ namespace IT_Solution_Platform.Controllers
                 PrimaryContactEmail = GetCurrentUserEmail()
             };
 
+            if (viewModel.ServiceId == 0) 
+            {
+                ViewBag.ErrorMessage = "Unable to load Penetration Testing service. Please try again later.";
+                return View("Error");
+            }
+
             return View(viewModel);
         }
 
         // POST: /Service/PenTesting
         [HttpPost]
-        
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> PenTesting(PenTestingRequestViewModel viewModel)
         {
             if (!ModelState.IsValid)
@@ -65,6 +71,11 @@ namespace IT_Solution_Platform.Controllers
             try
             {
                 var userId = GetCurrentUserId();
+                if (userId == null)
+                {
+                    ViewBag.ErrorMessage = "User not found. Please log in again.";
+                    return View("Error");
+                }
                 var accessToken = Request.Cookies["access_token"]?.Value;
                 var refershToken = Request.Cookies["refresh_token"]?.Value;
                 if (userId == null)
@@ -74,7 +85,12 @@ namespace IT_Solution_Platform.Controllers
                 }
 
                 viewModel.ServiceId = GetPenetrationTestingServiceId();
-                var newRequestId = await _serviceRequestService.CreatePenTestingServiceRequestAsync(viewModel, userId.Value, accessToken);
+                if (viewModel.ServiceId == 0)
+                {
+                    ViewBag.ErrorMessage = "Unable to load Penetration Testing service. Please try again later.";
+                    return View("Error");
+                }
+                var newRequestId = await _serviceRequestService.CreateServiceRequestAsync(viewModel, userId.Value, accessToken);
 
                 if (newRequestId.HasValue)
                 {
@@ -91,10 +107,162 @@ namespace IT_Solution_Platform.Controllers
                 // Replace with proper logging
                 Console.WriteLine($"Error in PenTesting POST: {ex}");
                 ModelState.AddModelError(string.Empty, "An unexpected error occurred. Please try again.");
+                return View("Error");
             }
 
             return View(viewModel);
         }
+
+
+        [HttpGet]
+        public ActionResult MobileWebApp() 
+        {
+            var viewModel = new MobileWebAppRequestViewModel
+            {
+                ServiceId = GetMobileWebAppServiceId(), 
+                PrimaryContactName = GetCurrentUserFullName(),
+                PrimaryContactEmail = GetCurrentUserEmail()
+            };
+
+            if (viewModel.ServiceId == 0)
+            {
+                ViewBag.ErrorMessage = "Unable to load Mobile & Web Application service. Please try again later.";
+                return View("Error");
+            }
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> MobileWebApp(MobileWebAppRequestViewModel viewModel)
+        {
+            if (!ModelState.IsValid) 
+            { 
+                return View(viewModel);
+            }
+
+            if (viewModel.SupportingDocuments != null)
+            {
+                foreach (var file in viewModel.SupportingDocuments)
+                {
+                    if (file != null) {
+                        
+                        if (file.ContentLength > 5 * 1024 * 1024) // 5MB in bytes
+                        {
+                            ModelState.AddModelError("SupportingDocuments", $"File {file.FileName} exceeds the 5MB limit.");
+                            return View(viewModel);
+                        }
+
+                    }
+                   
+                }
+            }
+
+            try 
+            {
+                var userId = GetCurrentUserId();
+
+                var accessToken = Request.Cookies["access_token"]?.Value;
+                var refershToken = Request.Cookies["refresh_token"]?.Value;
+                if (userId == null)
+                {
+                    ViewBag.ErrorMessage = "User not found. Please log in again.";
+                    return View("Error");
+                }
+                viewModel.ServiceId = GetMobileWebAppServiceId();
+                if (viewModel.ServiceId == 0)
+                {
+                    ViewBag.ErrorMessage = "Unable to load Mobile & Web Application service. Please try again later.";
+                    return View("Error");
+                }
+                var newRequestId = await _serviceRequestService.CreateServiceRequestAsync(viewModel, userId.Value, accessToken);
+                if (newRequestId.HasValue)
+                {
+                    TempData["SuccessMessage"] = $"Your Mobile Web Application request (ID: {newRequestId.Value}) has been submitted successfully.";
+                    return RedirectToAction("RequestSubmitted");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Failed to submit the request. Please try again.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Replace with proper logging
+                Console.WriteLine($"Error in MobileWebApp POST: {ex}");
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred. Please try again.");
+                ViewBag.ErrorMessage = "An unexpected error occurred while submitting your request. Please try again.";
+                return View("Error");
+            }
+            return View(viewModel);
+        }
+
+        [HttpGet]
+        public ActionResult NetworkService()
+        {
+            var viewModel = new NetworkServiceModel
+            {
+                ServiceId = GetNetworkServiceId(),
+                PrimaryContactName = GetCurrentUserFullName(),
+                PrimaryContactEmail = GetCurrentUserEmail()
+            };
+
+            if (viewModel.ServiceId == 0)
+            {
+                ViewBag.ErrorMessage = "Unable to load Network Service. Please try again later.";
+                return View("Error");
+            }
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> NetworkService(NetworkServiceModel viewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(viewModel);
+            }
+            try
+            {
+                var userId = GetCurrentUserId();
+                var accessToken = Request.Cookies["access_token"]?.Value;
+                var refershToken = Request.Cookies["refresh_token"]?.Value;
+                if (userId == null)
+                {
+                    ViewBag.ErrorMessage = "User not found. Please log in again.";
+                    return View("Error");
+                }
+                viewModel.ServiceId = GetNetworkServiceId();
+                if (viewModel.ServiceId == 0)
+                {
+                    ViewBag.ErrorMessage = "Unable to load Network Service. Please try again later.";
+                    return View("Error");
+                }
+                var newRequestId = await _serviceRequestService.CreateServiceRequestAsync(viewModel, userId.Value, accessToken);
+                if (newRequestId.HasValue)
+                {
+                    TempData["SuccessMessage"] = $"Your Network Service request (ID: {newRequestId.Value}) has been submitted successfully.";
+                    return RedirectToAction("RequestSubmitted");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Failed to submit the request. Please try again.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Replace with proper logging
+                Console.WriteLine($"Error in NetworkService POST: {ex}");
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred. Please try again.");
+                ViewBag.ErrorMessage = "An unexpected error occurred while submitting your request. Please try again.";
+                return View("Error");
+            }
+            return View(viewModel);
+        }
+
 
         [HttpGet]
         public ActionResult RequestSubmitted()
@@ -108,7 +276,49 @@ namespace IT_Solution_Platform.Controllers
         {
             try
             {
-                int result = (int) _databaseService.ExecuteQuerySingle<int>("SELECT service_id FROM services WHERE LOWER(name) = @name", new { name = "penetration testing" });
+                int result = (int) _databaseService.ExecuteQuerySingle<int>("SELECT service_id FROM services WHERE LOWER(TRIM(name)) = LOWER(TRIM(@name))", new { name = "penetration testing" });
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logService.LogAudit(
+                    userId: GetCurrentUserId() ?? 0,
+                    action: "Get Penetration Testing Service ID",
+                    entityType: "Service",
+                    entityId: null,
+                    details: new { error = ex.Message },
+                    ipAddress: Request.UserHostAddress,
+                    userAgent: Request.UserAgent);
+                return 0;
+            }
+        }
+
+        private int GetMobileWebAppServiceId()
+        {
+            try
+            {
+                int result = (int)_databaseService.ExecuteQuerySingle<int>("SELECT service_id FROM services WHERE LOWER(TRIM(name)) = LOWER(TRIM(@name))", new { name = "mobile & Web application" });
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logService.LogAudit(
+                    userId: GetCurrentUserId() ?? 0,
+                    action: "Get Penetration Testing Service ID",
+                    entityType: "Service",
+                    entityId: null,
+                    details: new { error = ex.Message },
+                    ipAddress: Request.UserHostAddress,
+                    userAgent: Request.UserAgent);
+                return 0;
+            }
+        }
+
+        private int GetNetworkServiceId()
+        {
+            try
+            {
+                int result = (int)_databaseService.ExecuteQuerySingle<int>("SELECT service_id FROM services WHERE LOWER(TRIM(name)) = LOWER(TRIM(@name))", new { name = "network service" });
                 return result;
             }
             catch (Exception ex)
@@ -135,7 +345,7 @@ namespace IT_Solution_Platform.Controllers
                     if (User is ClaimsPrincipal claimsPrincipal)
                     {
                         // Get the user_id claim that was set in the JWT filter
-                        var userIdClaim = claimsPrincipal.FindFirst("user_id")?.Value;
+                        var userIdClaim = claimsPrincipal.FindFirst("UserId")?.Value;
                         if (!string.IsNullOrEmpty(userIdClaim))
                         {
                             // Parse the user_id claim directly since it's already the database user_id
