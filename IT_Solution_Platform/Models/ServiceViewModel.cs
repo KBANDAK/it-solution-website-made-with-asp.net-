@@ -172,12 +172,15 @@ namespace IT_Solution_Platform.Models
 
         // Navigation properties (not mapped to database)
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [JsonIgnore]
         public Service Service { get; set; }
 
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [JsonIgnore]
         public RequestStatus Status { get; set; }
 
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [JsonIgnore]
         public User User { get; set; } // Assuming User is another model representing the user who made the request
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
         [JsonIgnore]
@@ -185,6 +188,7 @@ namespace IT_Solution_Platform.Models
 
         // Computed properties for display
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [JsonIgnore]
         public string PriorityText
         {
             get
@@ -198,30 +202,39 @@ namespace IT_Solution_Platform.Models
         }
 
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [JsonIgnore]
         public string FormattedRequestedDate => RequestedDate?.ToString("MMM dd, yyyy") ?? "";
 
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [JsonIgnore]
         public string FormattedApprovedDate => ApprovedDate?.ToString("MMM dd, yyyy") ?? "";
 
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [JsonIgnore]
         public string FormattedCompletionDate => CompletionDate?.ToString("MMM dd, yyyy") ?? "";
 
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [JsonIgnore]
         public string FormattedTotalAmount => TotalAmount?.ToString("C") ?? "N/A";
 
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [JsonIgnore]
         public string StatusName => Status?.StatusName ?? "Unknown";
 
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [JsonIgnore]
         public string ServiceName => Service?.Name ?? "Unknown Service";
 
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [JsonIgnore]
         public string CategoryName => Service?.Category?.Name ?? "";
 
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [JsonIgnore]
         public string ApproverFullName => ApprovedByUser != null ? $"" : "";
 
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [JsonIgnore]
         public int ProgressPercentage
         {
             get
