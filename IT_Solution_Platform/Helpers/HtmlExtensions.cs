@@ -35,5 +35,18 @@ namespace IT_Solution_Platform.Helpers
                            ?.GetCustomAttribute<DisplayAttribute>()
                            ?.GetName() ?? enumValue.ToString();
         }
+
+
+        public static string ToTitleCase(this string input)
+        { 
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+            // Insert spaces before capital letters (except the first)
+            string spaced = System.Text.RegularExpressions.Regex.Replace(input, "(?<!^)([A-Z])", " $1");
+
+            return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(input.ToLower());
+        }
     }
 }

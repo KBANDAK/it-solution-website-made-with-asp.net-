@@ -1,4 +1,5 @@
-﻿@{
+﻿@model IT_Solution_Platform.Models.ContactViewModle
+@{
     ViewBag.Title = "Contact";
 }
 
@@ -105,17 +106,74 @@
                         <div class="form-header">
                             <h3>Send us a message</h3>
                             <p>Fill out the form below and we'll get back to you shortly.</p>
+                            @if (Model.IsAuthenticated)
+                            {
+                                <div class="user-greeting">
+                                    <p>Welcome back, <strong>@Model.UserDisplayName</strong>!</p>
+                                </div>
+                            }
                         </div>
 
-                        <form id="contactForm">
+                        <!-- Success/Error Messages -->
+                        @if (!string.IsNullOrEmpty(ViewBag.SuccessMessage))
+                        {
+                            <div class="alert alert-success" id="successAlert">
+                                <div class="alert-content">
+                                    <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20,6 9,17 4,12"></polyline>
+                                    </svg>
+                                    <div class="alert-text">
+                                        <h4>Success!</h4>
+                                        <p>@ViewBag.SuccessMessage</p>
+                                    </div>
+                                    <button class="alert-close" aria-label="Close alert">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="alert-progress"></div>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+                        {
+                            <div class="alert alert-error" id="errorAlert">
+                                <div class="alert-content">
+                                    <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                                    </svg>
+                                    <div class="alert-text">
+                                        <h4>Error</h4>
+                                        <p>@ViewBag.ErrorMessage</p>
+                                    </div>
+                                    <button class="alert-close" aria-label="Close alert">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="alert-progress"></div>
+                            </div>
+                        }
+
+                        @using (Html.BeginForm("Contact", "Home", FormMethod.Post, new { @class = "contact-form-inner", id = "contactForm" }))
+                        {
+                            @Html.AntiForgeryToken()
+
                             <div class="form-row">
                                 <div class="form-field">
                                     <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                         <circle cx="12" cy="7" r="4"></circle>
                                     </svg>
-                                    <input type="text" class="form-input" placeholder="Your Name" required>
+                                    @Html.TextBoxFor(m => m.Name, new { @class = "form-input", placeholder = "Your Name", required = "required" })
                                     <div class="focus-indicator"></div>
+                                    @Html.ValidationMessageFor(m => m.Name, "", new { @class = "field-validation-error" })
                                 </div>
 
                                 <div class="form-field">
@@ -123,9 +181,19 @@
                                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                                         <polyline points="22,6 12,13 2,6"></polyline>
                                     </svg>
-                                    <input type="email" class="form-input" placeholder="Your Email" required>
+                                    @Html.TextBoxFor(m => m.Email, new { @class = "form-input", placeholder = "Your Email", type = "email", required = "required" })
                                     <div class="focus-indicator"></div>
+                                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "field-validation-error" })
                                 </div>
+                            </div>
+
+                            <div class="form-field">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                </svg>
+                                @Html.TextBoxFor(m => m.Phone, new { @class = "form-input", placeholder = "Phone Number (Optional)", type = "tel" })
+                                <div class="focus-indicator"></div>
+                                @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "field-validation-error" })
                             </div>
 
                             <div class="form-field">
@@ -135,13 +203,15 @@
                                     <line x1="10" y1="3" x2="8" y2="21"></line>
                                     <line x1="16" y1="3" x2="14" y2="21"></line>
                                 </svg>
-                                <input type="text" class="form-input" placeholder="Subject">
+                                @Html.TextBoxFor(m => m.Subject, new { @class = "form-input", placeholder = "Subject" })
                                 <div class="focus-indicator"></div>
+                                @Html.ValidationMessageFor(m => m.Subject, "", new { @class = "field-validation-error" })
                             </div>
 
                             <div class="form-field message-field">
-                                <textarea class="form-input" placeholder="Your Message" required></textarea>
+                                @Html.TextAreaFor(m => m.Message, new { @class = "form-input", placeholder = "Your Message", required = "required", rows = "6" })
                                 <div class="focus-indicator"></div>
+                                @Html.ValidationMessageFor(m => m.Message, "", new { @class = "field-validation-error" })
                             </div>
 
                             <button type="submit" class="submit-btn">
@@ -151,7 +221,7 @@
                                     <polyline points="12 5 19 12 12 19"></polyline>
                                 </svg>
                             </button>
-                        </form>
+                        }
                     </div>
                 </div>
             </div>
@@ -160,6 +230,26 @@
 </div>
 
 <style>
+    :root {
+        --dark-bg: #0a0e17;
+        --text-primary: #ffffff;
+        --text-secondary: #a0a8c3;
+        --text-bright: #f0f4ff;
+        --primary-color: #00e5ff;
+        --primary-dim: #00b8d4;
+        --primary-glow: #00e5ff;
+        --accent-glow: #ff00e5;
+        --card-bg: rgba(20, 25, 40, 0.7);
+        --card-hover: rgba(25, 30, 50, 0.8);
+        --glass-bg: rgba(20, 25, 40, 0.5);
+        --border-light: rgba(255, 255, 255, 0.1);
+        --border-hover: rgba(0, 229, 255, 0.3);
+        --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        --hover-shadow: 0 15px 40px rgba(0, 229, 255, 0.2);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --transition-fast: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
     * {
         margin: 0;
         padding: 0;
@@ -243,13 +333,8 @@
     }
 
     @@keyframes gridMove {
-        0% {
-            transform: perspective(1000px) rotateX(60deg) translateY(0);
-        }
-
-        100% {
-            transform: perspective(1000px) rotateX(60deg) translateY(30px);
-        }
+        0% { transform: perspective(1000px) rotateX(60deg) translateY(0); }
+        100% { transform: perspective(1000px) rotateX(60deg) translateY(30px); }
     }
 
     .glow {
@@ -278,15 +363,8 @@
     }
 
     @@keyframes pulse {
-        0% {
-            opacity: 0.3;
-            transform: scale(1);
-        }
-
-        100% {
-            opacity: 0.5;
-            transform: scale(1.2);
-        }
+        0% { opacity: 0.3; transform: scale(1); }
+        100% { opacity: 0.5; transform: scale(1.2); }
     }
 
     /* Tech Rings */
@@ -341,44 +419,28 @@
         animation: pulse-dot 3s ease-in-out infinite;
     }
 
-        .pulse-dot::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 15px;
-            height: 15px;
-            background-color: var(--primary-color);
-            border-radius: 50%;
-            box-shadow: 0 0 15px var(--primary-color);
-        }
+    .pulse-dot::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 15px;
+        height: 15px;
+        background-color: var(--primary-color);
+        border-radius: 50%;
+        box-shadow: 0 0 15px var(--primary-color);
+    }
 
     @@keyframes pulse-dot {
-        0% {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 0.7;
-        }
-
-        50% {
-            transform: translate(-50%, -50%) scale(1.5);
-            opacity: 1;
-        }
-
-        100% {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 0.7;
-        }
+        0% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+        50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
+        100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
     }
 
     @@keyframes spin {
-        0% {
-            transform: translate(-50%, -50%) rotate(0deg);
-        }
-
-        100% {
-            transform: translate(-50%, -50%) rotate(360deg);
-        }
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
     }
 
     /* Particles */
@@ -402,16 +464,16 @@
         position: relative;
     }
 
-        .section-heading h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin: 0;
-            background: linear-gradient(90deg, var(--text-bright), var(--primary-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -1px;
-            line-height: 1.1;
-        }
+    .section-heading h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin: 0;
+        background: linear-gradient(90deg, var(--text-bright), var(--primary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -1px;
+        line-height: 1.1;
+    }
 
     .heading-badge {
         display: inline-block;
@@ -464,12 +526,12 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
-        .info-item:hover {
-            background-color: var(--card-hover);
-            border-color: var(--border-hover);
-            transform: translateY(-4px) translateX(4px);
-            box-shadow: var(--hover-shadow);
-        }
+    .info-item:hover {
+        background-color: var(--card-hover);
+        border-color: var(--border-hover);
+        transform: translateY(-4px) translateX(4px);
+        box-shadow: var(--hover-shadow);
+    }
 
     .icon-wrapper {
         width: 52px;
@@ -533,30 +595,30 @@
         position: relative;
     }
 
-        .social-link:hover {
-            background-color: rgba(0, 229, 255, 0.08);
-            border-color: var(--border-hover);
-            transform: translateY(-4px) scale(1.1);
-            box-shadow: 0 5px 15px rgba(0, 229, 255, 0.2);
-        }
+    .social-link:hover {
+        background-color: rgba(0, 229, 255, 0.08);
+        border-color: var(--border-hover);
+        transform: translateY(-4px) scale(1.1);
+        box-shadow: 0 5px 15px rgba(0, 229, 255, 0.2);
+    }
 
-        .social-link:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at center, rgba(0, 229, 255, 0.2) 0%, transparent 70%);
-            opacity: 0;
-            transform: scale(0.5);
-            transition: var(--transition);
-        }
+    .social-link:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at center, rgba(0, 229, 255, 0.2) 0%, transparent 70%);
+        opacity: 0;
+        transform: scale(0.5);
+        transition: var(--transition);
+    }
 
-        .social-link:hover:before {
-            opacity: 1;
-            transform: scale(1.5);
-        }
+    .social-link:hover:before {
+        opacity: 1;
+        transform: scale(1.5);
+    }
 
     .social-icon {
         width: 18px;
@@ -589,39 +651,39 @@
         transition: var(--transition);
     }
 
-        .contact-form:hover {
-            box-shadow: var(--hover-shadow);
-            transform: translateY(-5px);
-            border-color: rgba(0, 229, 255, 0.15);
-        }
+    .contact-form:hover {
+        box-shadow: var(--hover-shadow);
+        transform: translateY(-5px);
+        border-color: rgba(0, 229, 255, 0.15);
+    }
 
-        .contact-form:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, var(--primary-color), var(--primary-dim));
-            opacity: 0.5;
-        }
+    .contact-form:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-dim));
+        opacity: 0.5;
+    }
 
     .form-header {
         margin-bottom: 2rem;
         text-align: center;
     }
 
-        .form-header h3 {
-            font-size: 1.8rem;
-            margin: 0 0 0.75rem 0;
-            color: var(--text-bright);
-            font-weight: 700;
-        }
+    .form-header h3 {
+        font-size: 1.8rem;
+        margin: 0 0 0.75rem 0;
+        color: var(--text-bright);
+        font-weight: 700;
+    }
 
-        .form-header p {
-            margin: 0;
-            color: var(--text-secondary);
-        }
+    .form-header p {
+        margin: 0;
+        color: var(--text-secondary);
+    }
 
     .form-row {
         display: grid;
@@ -695,6 +757,105 @@
         transform: scale(1.1);
     }
 
+    /* Alert Styles */
+    .alert {
+        position: relative;
+        padding: 1.25rem;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        animation: slideIn 0.5s ease-out forwards;
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    .alert-success {
+        background-color: rgba(0, 255, 127, 0.1);
+        border: 1px solid rgba(0, 255, 127, 0.3);
+        color: #ccffcc;
+    }
+
+    .alert-error {
+        background-color: rgba(255, 77, 77, 0.1);
+        border: 1px solid rgba(255, 77, 77, 0.3);
+        color: #ffcccc;
+    }
+
+    .alert-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .alert-icon {
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
+        color: inherit;
+        animation: bounce 0.6s ease-in-out;
+    }
+
+    .alert-text {
+        flex: 1;
+    }
+
+    .alert-text h4 {
+        margin: 0 0 0.25rem 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .alert-text p {
+        margin: 0;
+        font-size: 0.95rem;
+        opacity: 0.9;
+    }
+
+    .alert-close {
+        background: none;
+        border: none;
+        cursor: pointer;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        color: inherit;
+        opacity: 0.7;
+        transition: var(--transition);
+    }
+
+    .alert-close:hover {
+        opacity: 1;
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: rotate(90deg);
+    }
+
+    .alert-close svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .alert-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, rgba(0, 255, 127, 0.5), rgba(0, 255, 127, 0.2));
+        animation: progress 5s linear forwards;
+        transform: scaleX(1);
+        transform-origin: left;
+    }
+
+    .alert-error .alert-progress {
+        background: linear-gradient(90deg, rgba(255, 77, 77, 0.5), rgba(255, 77, 77, 0.2));
+    }
+
     /* Submit Button */
     .submit-btn {
         width: 100%;
@@ -716,16 +877,16 @@
         margin-top: 1rem;
     }
 
-        .submit-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: all 0.8s ease;
-        }
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: all 0.8s ease;
+    }
 
     .btn-icon {
         width: 18px;
@@ -739,23 +900,35 @@
         box-shadow: 0 8px 25px rgba(0, 229, 255, 0.4);
     }
 
-    .submit-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(0, 229, 255, 0.4);
+    .submit-btn:hover::before {
+        left: 100%;
     }
 
-        .submit-btn:hover::before {
-            left: 100%;
-        }
-
-        .submit-btn:hover .btn-icon {
-            transform: translateX(3px);
-            opacity: 1;
-        }
+    .submit-btn:hover .btn-icon {
+        transform: translateX(3px);
+        opacity: 1;
+    }
 
     .submit-btn:active {
         transform: translateY(0);
         box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
+    }
+
+    /* Animations */
+    @@keyframes slideIn {
+        0% { transform: translateY(20px); opacity: 0; }
+        100% { transform: translateY(0); opacity: 1; }
+    }
+
+    @@keyframes bounce {
+        0% { transform: scale(0.5); opacity: 0; }
+        50% { transform: scale(1.2); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    @@keyframes progress {
+        0% { transform: scaleX(1); }
+        100% { transform: scaleX(0); }
     }
 
     /* Responsive Design */
@@ -813,19 +986,38 @@
             margin-top: 0.5rem;
         }
     }
-
-    /* Animations */
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
 </style>
 
+<script>
+    // Auto-dismiss alerts after 5 seconds or on close button click
+    document.addEventListener('DOMContentLoaded', function () {
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
 
+        function dismissAlert(alert) {
+            if (alert) {
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    alert.style.display = 'none';
+                }, 500);
+            }
+        }
+
+        if (successAlert) {
+            setTimeout(() => dismissAlert(successAlert), 5000);
+            const closeBtn = successAlert.querySelector('.alert-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => dismissAlert(successAlert));
+            }
+        }
+
+        if (errorAlert) {
+            setTimeout(() => dismissAlert(errorAlert), 5000);
+            const closeBtn = errorAlert.querySelector('.alert-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => dismissAlert(errorAlert));
+            }
+        }
+    });
+</script>

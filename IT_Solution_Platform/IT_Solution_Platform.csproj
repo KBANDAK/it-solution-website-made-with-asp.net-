@@ -259,6 +259,7 @@
     <Compile Include="App_Start\UnityMvcActivator.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\ProfileController.cs" />
     <Compile Include="Controllers\ServiceController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -270,9 +271,11 @@
     <Compile Include="Handlers\ServiceRequestHandlerFactory.cs" />
     <Compile Include="Helpers\HtmlExtensions.cs" />
     <Compile Include="Models\AccountViewModel.cs" />
+    <Compile Include="Models\ServiceViewModel.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\AuditLogService.cs" />
+    <Compile Include="Services\ContactInquiryService.cs" />
     <Compile Include="Services\FileUploadService.cs" />
     <Compile Include="Services\ServiceRequestService.cs" />
     <Compile Include="Services\SupabaseAuthService.cs" />
@@ -393,6 +396,7 @@
     <Content Include="Views\Service\MobileWebApp.cshtml" />
     <Content Include="Views\Service\NetworkService.cshtml" />
     <Content Include="Views\Account\Profile.cshtml" />
+    <Content Include="Views\Profile\ServiceOrdersAsync.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Principal;
+using Supabase.Postgrest.Models;
 
 namespace IT_Solution_Platform.Models
 {
@@ -9,7 +10,7 @@ namespace IT_Solution_Platform.Models
     /// Represents a user entity in the database, mapping to the public.users table.
     /// </summary>
 
-    public class User : IIdentity
+    public class User : BaseModel, IIdentity
     {
         /// <summary>
         /// The unique identifier for the user (auto-incremented).

@@ -283,53 +283,31 @@ namespace IT_Solution_Platform.Models
     }
 
 
-    [Table("service_requests")]
-    public class ServiceRequest : BaseModel
+    
+
+    /// <summary>
+    /// View model for service requests, including status details for UI display.
+    /// </summary>
+    public class ServiceRequestViewModel
     {
-        [PrimaryKey("request_id")] // Assuming auto-incrementing PK
         public int RequestId { get; set; }
-
-        [Column("user_id")]
         public int UserId { get; set; }
-
-        [Column("service_id")]
         public int ServiceId { get; set; }
-
-        [Column("package_id")]
         public int? PackageId { get; set; }
-
-        [Column("status_id")]
         public int StatusId { get; set; }
-
-        [Column("request_details")]
         public string RequestDetails { get; set; }
-
-        [Column("priority")]
         public short? Priority { get; set; }
-
-        [Column("requested_date")]
         public DateTime? RequestedDate { get; set; }
-
-        [Column("approved_by")]
         public int? ApprovedBy { get; set; }
-
-        [Column("approved_date")]
         public DateTime? ApprovedDate { get; set; }
-
-        [Column("completion_date")]
         public DateTime? CompletionDate { get; set; }
-
-        [Column("total_amount")]
         public decimal? TotalAmount { get; set; }
-
-        [Column("notes")]
         public string Notes { get; set; }
-
-        [Column("created_at")]
         public DateTime CreatedAt { get; set; }
-
-        [Column("updated_at")]
         public DateTime UpdatedAt { get; set; }
+        public string StatusName { get; set; }
+        public string Description { get; set; }
+        public string ColorCode { get; set; }
     }
 
     [Table("service_request_documents")]
@@ -523,6 +501,59 @@ namespace IT_Solution_Platform.Models
         public string DisplayEmail => string.IsNullOrEmpty(Email) ? "Not provided" : Email;
         public string DisplayRoleName => string.IsNullOrEmpty(RoleName) ? "User" : RoleName;
         public string FormattedCreatedDate => CreatedAt?.ToString("MMMM dd, yyyy") ?? "Unknown";
+    }
+
+
+    // Contact View Model
+    public class ContactViewModle
+    {
+        [Required(ErrorMessage = "Name is required")]
+        [StringLength(150, ErrorMessage = "Name cannot exceed 150 characters")]
+        [Display(Name = "Full Name")]
+        public string Name { get; set; }
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
+        [StringLength(255, ErrorMessage = "Email connot exceed 255 characters")]
+        [Display(Name = "Email Address")]
+        public string Email { get; set; }
+
+        [Phone(ErrorMessage = "Invalid phone number")]
+        [StringLength(20, ErrorMessage = "Phone number cannot exceed 20 characters")]
+        [Display(Name = "Phone Number")]
+        public string Phone { get; set; }
+
+        [StringLength(255, ErrorMessage = "Subject cannot exceed 255 characters")]
+        [Display(Name = "Subject")]
+        public string Subject { get; set; }
+
+        [Required(ErrorMessage = "Message is required")]
+        [StringLength(2000, ErrorMessage = "Message cannot exceed 2000 characters")]
+        [Display(Name = "Message")]
+        public string Message { get; set; }
+
+        // Read-only properties for display purposes
+        public bool IsAuthenticated { get; set; }
+        public string UserDisplayName { get; set; }
+    }
+
+    // Contact inqueriy
+    public class ContactInquiryModel 
+    {
+        public int inquiry_id { get; set; }
+        public string name { get; set; }
+
+        public string email { get; set; }
+        public string phone { get; set; }
+        public string subject { get; set; }
+        public string message { get; set; }
+        public bool? is_read { get; set; }
+
+        public DateTime? responded_at { get; set; }
+        public DateTime? created_at { get; set; }
+
+        // Navigation property
+        public User RespondedByUser { get; set; }
     }
 
 

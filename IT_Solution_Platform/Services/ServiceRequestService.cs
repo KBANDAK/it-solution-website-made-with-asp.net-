@@ -10,6 +10,7 @@ using IT_Solution_Platform.Models;
 using Newtonsoft.Json;
 using Supabase;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
+using static Supabase.Postgrest.Constants;
 
 namespace IT_Solution_Platform.Services
 {
@@ -182,6 +183,41 @@ namespace IT_Solution_Platform.Services
                 return null;
             }
         }
+
+
+
+        /// <summary>
+        /// Fetch comprehensive service requests with enhanced data for a specific user
+        /// </summary>
+        /// <param name="userId">User ID to fetch requests for</param>
+        /// <returns>List of detailed service request view models</returns>
+        /// 
+        public async Task<List<ServiceRequestDetailViewModel>> GetUserServiceRequestsAsync(int userId)
+        {
+            try
+            {
+                // Call the PostgreSQL function 'get_user_service_requests' with the correct parameter
+                var result = await _supabaseClient.Rpc("get_user_service_requests", new { p_user_id = userId });
+
+                // Deserialize the JSON response into the expected type
+                var serviceRequestDetails = JsonConvert.DeserializeObject<List<ServiceRequestDetailViewModel>>(result.Content);
+                return serviceRequestDetails;
+            }
+            catch (Exception ex)
+            {
+                _auditLogService.LogAudit(
+                    userId,
+                    "GetUserServiceRequests",
+                    "Failed to fetch user service requests",
+                    null,
+                    new { ErrorMessage = ex.Message, StackTrace = ex.StackTrace },
+                    IpAddress,
+                    UserAgent
+                );
+                throw;
+            }
+        }
+
     }
 
     enum ErrorType
