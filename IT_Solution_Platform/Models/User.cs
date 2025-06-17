@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Principal;
+using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
 namespace IT_Solution_Platform.Models
@@ -10,12 +10,13 @@ namespace IT_Solution_Platform.Models
     /// Represents a user entity in the database, mapping to the public.users table.
     /// </summary>
 
+    [Table("users")]
     public class User : BaseModel, IIdentity
     {
         /// <summary>
         /// The unique identifier for the user (auto-incremented).
         /// </summary>
-        [Key]
+        [PrimaryKey]
         [Column("user_id")]
         public int user_id { get; set; }
 
@@ -83,7 +84,7 @@ namespace IT_Solution_Platform.Models
         /// The timestamp of the user's last login.
         /// </summary>
         [Column("last_login")]
-        public DateTime? last_login { get; set; }
+        public DateTime? last_login { get; set; } = DateTime.UtcNow;
 
         /// <summary>
         /// The token used for password reset (optional).
@@ -102,13 +103,13 @@ namespace IT_Solution_Platform.Models
         /// The timestamp when the user was created.
         /// </summary>
         [Column("created_at")]
-        public DateTime created_at { get; set; }
+        public DateTime? created_at { get; set; }
 
         /// <summary>
         /// The timestamp when the user was last updated.
         /// </summary>
         [Column("updated_at")]
-        public DateTime updated_at { get; set; }
+        public DateTime? updated_at { get; set; }
 
         /// <summary>
         /// The Supabase user ID (unique, links to Supabase auth).
@@ -118,7 +119,7 @@ namespace IT_Solution_Platform.Models
         public Guid supabase_uid { get; set; }
 
         // Navigation properties
-        public Role Role { get; set; }
+        public Role roles { get; set; }
 
         // Computed properties
         public string FullNameS => $"{first_name} {last_name}".Trim();

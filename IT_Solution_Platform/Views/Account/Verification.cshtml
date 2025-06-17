@@ -33,49 +33,38 @@
 
 @section Scripts {
     <script>
-        // Function to parse URL fragment parameters
+        // Updated JavaScript to handle both query parameters AND fragments
+        function getQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            return Object.fromEntries(params);
+        }
+
         function getFragmentParams() {
-            const fragment = window.location.hash.substring(1); // Remove '#'
+            const fragment = window.location.hash.substring(1);
             const params = new URLSearchParams(fragment);
             return Object.fromEntries(params);
         }
 
-        // Prevent infinite redirects by checking if verification is already processed
-        if (!sessionStorage.getItem("verification_processed")) {
-            const fragmentParams = getFragmentParams();
-            if (fragmentParams.access_token && fragmentParams.type) {
-                // Handle successful verification
-                const queryString = `access_token=${encodeURIComponent(fragmentParams.access_token)}&type=${encodeURIComponent(fragmentParams.type)}`;
-                sessionStorage.setItem("verification_query", queryString);
-                sessionStorage.setItem("verification_processed", "true");
-                window.location.href = `/Account/verify?${queryString}`;
-            } else if (fragmentParams.error && fragmentParams.error_code && fragmentParams.error_description) {
-                // Handle error case
-                const queryString = `error=${encodeURIComponent(fragmentParams.error)}&error_code=${encodeURIComponent(fragmentParams.error_code)}&error_description=${encodeURIComponent(fragmentParams.error_description)}`;
-                sessionStorage.setItem("verification_query", queryString);
-                sessionStorage.setItem("verification_processed", "true");
-                window.location.href = `/Account/verify?${queryString}`;
-            }
-        }
 
         // Poll server to check if user has verified their email
         async function checkVerificationStatus() {
             try {
-                const response = await fetch('/Account/CheckVerificationStatus?email=@HttpUtility.JavaScriptStringEncode(email)', {
+                const email = '@HttpUtility.JavaScriptStringEncode(email)';
+                console.log("Polling CheckVerificationStatus with email:", email);
+                const response = await fetch('/Account/CheckVerificationStatus?email=' + encodeURIComponent(email), {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json'
                     }
                 });
                 const data = await response.json();
+                console.log("CheckVerificationStatus response:", data);
                 if (data.isVerified) {
-                    // Stop polling and redirect to dashboard
                     document.getElementById("spinner").style.display = "none";
                     sessionStorage.removeItem("verification_query");
                     sessionStorage.removeItem("verification_processed");
-                    window.location.href = '@Url.Action("Dashboard", "Home")';
+                    window.location.href = '@Url.Action("Index", "Home")';
                 } else if (data.error) {
-                    // Stop polling and show error
                     document.getElementById("spinner").style.display = "none";
                     const messageDiv = document.querySelector(".verify-message");
                     messageDiv.textContent = data.error;
@@ -103,8 +92,7 @@
     </script>
 }
 
-
-@@section Styles {
+@section Styles {
 <style>
         
 

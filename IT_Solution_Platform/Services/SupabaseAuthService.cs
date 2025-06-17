@@ -3,17 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
-using Microsoft.Owin; // Add this
 using System.Windows.Forms.VisualStyles;
 using IT_Solution_Platform.Models;
+using Microsoft.AspNet.Identity;
+using Microsoft.Owin; // Add this
+using Microsoft.Owin.Security;
 using Newtonsoft.Json;
 using Supabase.Gotrue;
 using static System.Net.WebRequestMethods;
-using Microsoft.Owin.Security;
 
 namespace IT_Solution_Platform.Services
 {
@@ -86,22 +88,22 @@ namespace IT_Solution_Platform.Services
 
                 // Insert user metadata into the database
                 var supabaseUid = Guid.TryParse(session.User.Id, out var uid) ? uid : throw new Exception("Invalid Supabase UID");
-                var user = new Models.User
+                var userParameters = new
                 {
-                    email = email,
-                    first_name = firstName,
-                    last_name = lastName,
-                    phone_number = phoneNumber,
-                    is_active = accessToken != null, // Active only if no email confirmation is required
-                    supabase_uid = supabaseUid,
-                    role_id = defaultRole.role_id,
-                    password_hash = "supabase_managed",
+                    Email = email,
+                    FirstName = firstName,
+                    LastName = lastName,
+                    PhoneNumber = phoneNumber,
+                    IsActive = false, // Active only if no email confirmation is required
+                    SupabaseUid = supabaseUid,
+                    RoleId = defaultRole.role_id,
+                    PasswordHash = "supabase_managed",
                 };
 
                 var insertQuery = @"INSERT INTO users (email, first_name, last_name, phone_number, is_active, supabase_uid, role_id, password_hash)
                            VALUES (@Email, @FirstName, @LastName, @PhoneNumber, @IsActive, @SupabaseUid, @RoleId, @PasswordHash)";
 
-                var insertResult = _database.ExecuteNonQuery(insertQuery, user);
+                var insertResult = _database.ExecuteNonQuery(insertQuery, userParameters);
                 if (insertResult <= 0)
                 {
                     _auditLog.LogAudit(0, "Registration failed", lastName, null, new { Email = email, Error = "Insertion in users table error." }, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
@@ -167,14 +169,143 @@ namespace IT_Solution_Platform.Services
             }
         }
 
+
+        public async Task<Models.User> UpdateAndGetUser(string email)
+        {
+            try
+            {
+                // Use database function to avoid RLS recursion issues
+                var result = await _supabaseClient.Postgrest.Rpc("update_user_last_login", new Dictionary<string, object>
+                {
+                    { "user_email", email }
+                });
+
+                if (result?.Content != null)
+                {
+                    // Parse the result to get the updated user
+                    var updatedUser = System.Text.Json.JsonSerializer.Deserialize<Models.User>(result.Content, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+                    return updatedUser;
+                }
+
+                // Fallback: get user without updating if function fails
+                var dbUser = await _supabaseClient
+                    .From<Models.User>()
+                    .Where(u => u.email == email)
+                    .Single();
+
+                return dbUser;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to update user login timestamp: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<Models.User> GetUser(string email)
+        {
+            try
+            {
+                var result = await _supabaseClient
+                    .From<Models.User>()
+                    .Select("*, roles(*)")
+                    .Where(u => u.email == email)
+                    .Single();
+
+                // Extract user and role from the joined result
+                var dbUser = result;
+
+
+                return dbUser;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to get user : {ex.Message}", ex);
+            }
+        }
         public Task<(bool Success, string Message)> ConfirmEmailAsync(string userId, string token)
         {
             throw new NotImplementedException();
         }
 
-        public Task<(bool Success, string Message)> ResendVerificationEmailAsync(string email)
+        public async Task<(bool Success, string Message)> ResendVerificationEmailAsync(string email)
         {
-            throw new NotImplementedException();
+            try
+            {
+                // Validate input
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    return (false, "Email is required.");
+                }
+
+                // Check if user exists in database
+                var dbUser = _database.ExecuteQuery<Models.User>("SELECT * FROM users WHERE email = @Email", new { Email = email }).FirstOrDefault();
+                if (dbUser == null)
+                {
+                    _auditLog.LogAudit(0, "Resend Verification Failed", "User", null, new { Email = email, Error = "User not found" }, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
+                    return (false, "User not found. Please register first.");
+                }
+
+                // Check if user is already verified
+                if (dbUser.is_active)
+                {
+                    _auditLog.LogAudit(0, "Resend Verification Skipped", "User", null, new { Email = email, Reason = "Already verified" }, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
+                    return (true, "Your email is already verified. You can sign in now.");
+                }
+
+                // Get user from Supabase to check verification status
+                var supabaseUser = await _supabaseClient.AdminAuth(SupabaseConfig.SupabaseServiceKey).GetUserById(dbUser.supabase_uid.ToString());
+                if (supabaseUser == null)
+                {
+                    _auditLog.LogAudit(0, "Resend Verification Failed", "User", null, new { Email = email, Error = "Supabase user not found" }, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
+                    return (false, "User account not found. Please register again.");
+                }
+
+                // Check if email is already confirmed in Supabase
+                if (supabaseUser.EmailConfirmedAt.HasValue)
+                {
+                    // Update local database if Supabase shows verified but local doesn't
+                    var updateQuery = "UPDATE users SET is_active = @IsActive, updated_at = @UpdatedAt WHERE supabase_uid = @SupabaseUid";
+                    _database.ExecuteNonQuery(updateQuery, new
+                    {
+                        IsActive = true,
+                        UpdatedAt = DateTime.UtcNow,
+                        SupabaseUid = dbUser.supabase_uid
+                    });
+
+                    return (true, "Your email is already verified. You can sign in now.");
+                }
+
+                // Resend verification email through Supabase
+                var redirectUrl = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority + "/Account/verify";
+
+                await _supabaseClient.AdminAuth(SupabaseConfig.SupabaseServiceKey).InviteUserByEmail(email, new InviteUserByEmailOptions
+                {
+                    RedirectTo = redirectUrl
+                });
+
+                _auditLog.LogAudit(0, "Resend Verification Success", "User", null, new { Email = email }, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
+                return (true, "Verification email has been resent. Please check your inbox and spam folder.");
+            }
+            catch (Supabase.Gotrue.Exceptions.GotrueException gotrueEx)
+            {
+                _auditLog.LogAudit(0, "Resend Verification Failed", "User", null, new { Email = email, Error = gotrueEx.Message }, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
+
+                // Handle specific Supabase errors
+                if (gotrueEx.Message.Contains("rate limit"))
+                {
+                    return (false, "Too many requests. Please wait a few minutes before requesting another verification email.");
+                }
+
+                return (false, $"Failed to resend verification email: {gotrueEx.Message}");
+            }
+            catch (Exception ex)
+            {
+                _auditLog.LogAudit(0, "Resend Verification Error", "User", null, new { Email = email, Error = ex.Message }, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
+                return (false, "An unexpected error occurred. Please try again later.");
+            }
         }
 
         public async Task<(bool Success, string Message)> ResetPasswordForEmailAsync(string email)
@@ -344,7 +475,7 @@ namespace IT_Solution_Platform.Services
                      new Claim("LastName", user.last_name ?? ""),
                      new Claim("AccessToken", accessToken ?? ""),
                      new Claim("RoleId", user.role_id.ToString()),
-                     new Claim(ClaimTypes.Role, user.Role?.role_name ?? "") // Optional: Add role name
+                     new Claim(ClaimTypes.Role, user.roles?.role_name ?? "") // Optional: Add role name
                 };
 
                 var identity = new ClaimsIdentity(claims, "ApplicationCookie");

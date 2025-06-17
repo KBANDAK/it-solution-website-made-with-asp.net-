@@ -670,6 +670,7 @@ namespace IT_Solution_Platform.Models
     /// <summary>
     /// Role model representing user roles
     /// </summary>
+    /// 
     public class Role
     {
         public int role_id { get; set; }

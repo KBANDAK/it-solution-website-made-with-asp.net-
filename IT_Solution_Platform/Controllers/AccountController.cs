@@ -9,6 +9,7 @@ using System.Web.Services;
 using IT_Solution_Platform.Models;
 using IT_Solution_Platform.Services;
 using Supabase.Gotrue;
+using Supabase.Interfaces;
 
 namespace IT_Solution_Platform.Controllers
 {
@@ -160,7 +161,7 @@ namespace IT_Solution_Platform.Controllers
                         return View("Verification");
                     }
 
-                    if ((bool)!dbUser.is_active)
+                    if (!dbUser.is_active) // Simplified boolean check
                     {
                         var updateQuery = "UPDATE users SET is_active = @IsActive, updated_at = @UpdatedAt WHERE supabase_uid = CAST(@SupabaseUid AS uuid)";
                         var updateResult = _databaseService.ExecuteNonQuery(updateQuery, new
@@ -181,6 +182,7 @@ namespace IT_Solution_Platform.Controllers
                         dbUser.is_active = true;
                         dbUser.updated_at = DateTime.UtcNow;
                     }
+
                     _auditLogService.LogAudit(0, "Verification Success", "User", null, new { Email = supabaseUser.Email, SupabaseUid = supabaseUser.Id }, Request.UserHostAddress, Request.UserAgent);
                     return RedirectToAction("Index", "Home");
                 }
@@ -203,8 +205,12 @@ namespace IT_Solution_Platform.Controllers
         {
             try
             {
+                // Log the email parameter
+                _auditLogService.LogAudit(0, "Check Verification Attempt", "System", null, new { Email = email }, Request.UserHostAddress, Request.UserAgent);
+
                 if (string.IsNullOrEmpty(email))
                 {
+                    _auditLogService.LogAudit(0, "Check Verification Failure", "User", null, new { Email = email, Error = "Email is required" }, Request.UserHostAddress, Request.UserAgent);
                     return Json(new { isVerified = false, error = "Email is required" }, JsonRequestBehavior.AllowGet);
                 }
 
@@ -218,6 +224,7 @@ namespace IT_Solution_Platform.Controllers
                 var supabaseUser = await _authService.GetUserByIdAsync(dbUser.supabase_uid.ToString());
                 if (supabaseUser?.EmailConfirmedAt != null && (bool)dbUser.is_active)
                 {
+                    _auditLogService.LogAudit(0, "Check Verification Success", "User", null, new { Email = email, SupabaseUid = dbUser.supabase_uid }, Request.UserHostAddress, Request.UserAgent);
                     return Json(new { isVerified = true }, JsonRequestBehavior.AllowGet);
                 }
 
@@ -227,6 +234,45 @@ namespace IT_Solution_Platform.Controllers
             {
                 _auditLogService.LogAudit(0, "Check Verification Error", "User", null, new { Email = email, Error = ex.Message }, Request.UserHostAddress, Request.UserAgent);
                 return Json(new { isVerified = false, error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<ActionResult> ResendConfirmation(string email)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    ViewBag.ErrorMessage = "Email is required.";
+                    return View("Verification");
+                }
+
+                var (success, message) = await _authService.ResendVerificationEmailAsync(email);
+
+                if (success)
+                {
+                    ViewBag.Message = message;
+                    ViewBag.Email = email;
+                    TempData["Email"] = email;
+                    TempData["SuccessMessage"] = message;
+                }
+                else
+                {
+                    ViewBag.ErrorMessage = message;
+                    ViewBag.Email = email;
+                }
+
+                return View("Verification");
+            }
+            catch (Exception ex)
+            {
+                _auditLogService.LogAudit(0, "Resend Confirmation Error", "User", null, new { Email = email, Error = ex.Message }, Request.UserHostAddress, Request.UserAgent);
+                ViewBag.ErrorMessage = "An unexpected error occurred. Please try again later.";
+                ViewBag.Email = email;
+                return View("Verification");
             }
         }
         #endregion
@@ -265,7 +311,8 @@ namespace IT_Solution_Platform.Controllers
                     ModelState.AddModelError("", "Invalid email or password.");
                     return View(model);
                 }
-                var dbUser = _databaseService.ExecuteQuery<Models.User>("SELECT * FROM users WHERE email = @Email", new { Email = model.Email }).FirstOrDefault();
+                // Replace the raw SQL query with Supabase ORM
+                var dbUser = await _authService.UpdateAndGetUser(model.Email);
                 if (dbUser == null || (bool)!dbUser.is_active)
                 {
                     _auditLogService.LogAudit(0, "Login Failure", "User", null, new { Email = model.Email, Error = "User not found or inactive" }, Request.UserHostAddress, Request.UserAgent);
@@ -426,12 +473,13 @@ namespace IT_Solution_Platform.Controllers
 
 
         // Add these methods to your AccountController or create a ProfileController
-        #region Profile Methods
+        #region Profiles Methods
 
         [HttpGet]
         [Authorize]
         [ActionName("Profile")]
-        public ActionResult UserProfile()
+
+        public async Task<ActionResult> UserProfile()
         {
             try
             {
@@ -454,7 +502,7 @@ namespace IT_Solution_Platform.Controllers
                 }
 
                 // Query user from database with role information
-                var query = @"
+                /*var query = @"
             SELECT u.user_id, u.email, u.first_name, u.last_name, u.phone_number,
                    u.is_active, u.created_at, u.updated_at, u.supabase_uid,
                    u.role_id, u.password_hash, u.profile_picture, u.last_login,
@@ -462,9 +510,9 @@ namespace IT_Solution_Platform.Controllers
                    r.role_name
             FROM users u
             LEFT JOIN roles r ON u.role_id = r.role_id
-            WHERE u.user_id = @UserId";
+            WHERE u.user_id = @UserId";*/
 
-                var user = _databaseService.ExecuteQuery<Models.User>(query, new { UserId = userId }).FirstOrDefault();
+                var user = await _authService.GetUser(claimsIdentity.Name);
 
                 if (user == null)
                 {
@@ -490,7 +538,7 @@ namespace IT_Solution_Platform.Controllers
                     LastName = user.last_name,
                     PhoneNumber = user.phone_number,
                     IsActive = user.is_active,
-                    RoleName = user.Role?.role_name ?? "User", // Handle null role
+                    RoleName = user.roles?.role_name ?? "User", // Handle null role
                     CreatedAt = user.created_at,
                     UpdatedAt = user.updated_at
                 };
