@@ -1,14 +1,20 @@
 ﻿@model List<IT_Solution_Platform.Models.ServiceRequestDetailViewModel>
 @using IT_Solution_Platform.Helpers
+@using System.Text.Json
+@using System.Text.Encodings.Web
 @{
     ViewBag.Title = "Service Orders";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <style>
+    body {
+        color: var(--primary-text);
+    }
     /* Enhanced Container with proper spacing */
     .service-orders-container {
         background: var(--dark-bg);
+        color: var(--primary-text);
         min-height: 100vh;
         padding: 2rem 1rem;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -82,7 +88,7 @@
         background-clip: text;
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 1.8rem;
         line-height: 1.2;
     }
 
@@ -212,6 +218,7 @@
         /* Orders Grid - Table View */
         .orders-grid.table {
             display: block;
+            --bs-table-color: white;
         }
 
     .table-header {
@@ -725,7 +732,7 @@
 
     .tech-icon {
         width: 1.2rem;
-        height: 1.2rem;
+        /*height: 1.2rem;*/
         opacity: 0.9;
         filter: drop-shadow(0 0 3px currentColor);
     }
@@ -1091,8 +1098,11 @@
                             <div>@(order.total_amount.HasValue ? order.FormattedTotalAmount : "N/A")</div>
                             <div>@order.FormattedRequestedDate</div>
                             <div>
-                                <button class="btn-tech btn-primary" onclick="viewOrderDetails(@order.request_id)" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">
-                                    <i class="fas fa-eye"></i>
+                                <button class="btn-tech btn-primary"
+                                        data-request-id="@order.request_id"
+                                        data-details="@Html.Raw(JavaScriptEncoder.Default.Encode(JsonSerializer.Serialize(order)))"
+                                        onclick="viewOrderDetails(this)">
+                                    <i class="fas fa-eye tech-icon"></i>
                                 </button>
                             </div>
                         </div>
@@ -1279,28 +1289,31 @@
                                 }
                             }
 
-                            <div class="order-actions">
-                                <button class="btn-tech btn-primary" onclick="viewOrderDetails(@order.request_id)" aria-label="View details for order @order.request_id">
-                                    <i class="fas fa-eye tech-icon" aria-hidden="true"></i>
-                                    View Details
+                        <div class="order-actions">
+                            <button class="btn-tech btn-primary"
+                                    data-request-id="@order.request_id"
+                                    data-details="@Html.Raw(JavaScriptEncoder.Default.Encode(JsonSerializer.Serialize(order)))"
+                                    onclick="viewOrderDetails(this)">
+                                <i class="fas fa-eye tech-icon"></i> View Details
+                            </button>
+
+                            @if (order.status_name?.ToLower() == "pending")
+                            {
+                                <button class="btn-tech" onclick="startPayment(@order.request_id, '@order.FormattedTotalAmount')" aria-label="Pay for order @order.request_id">
+                                    <i class="fas fa-credit-card tech-icon" aria-hidden="true"></i>
+                                    Payment (@order.FormattedTotalAmount)
                                 </button>
+                            }
 
-                                @if (order.status_name?.ToLower() == "pending" || order.status_name?.ToLower() == "submitted")
-                                {
-                                    <button class="btn-tech" onclick="editOrder(@order.request_id)" aria-label="Edit request for order @order.request_id">
-                                        <i class="fas fa-edit tech-icon" aria-hidden="true"></i>
-                                        Edit Request
-                                    </button>
-                                }
-
-                                @if (order.status_name?.ToLower() == "completed") 
-                                {
-                                    <button class="btn-tech" onclick="downloadReceipt(@order.request_id)" aria-label="Download receipt for order @order.request_id">
-                                        <i class="fas fa-download tech-icon" aria-hidden="true"></i>
-                                        Download
-                                    </button>
-                                }
-                            </div>
+                            @if (order.status_name?.ToLower() == "completed")
+                            {
+                                <button class="btn-tech btn-success"
+                                        data-details="@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(System.Text.Json.JsonSerializer.Serialize(order)))"
+                                        onclick="downloadReceipt(this)">
+                                    <i class="fas fa-download tech-icon"></i> Download Receipt
+                                </button>
+                            }
+                        </div>
                         </div>
                     </div>
                 }
@@ -1436,52 +1449,93 @@
     statusFilter.addEventListener('change', filterOrders);
     priorityFilter.addEventListener('change', filterOrders);
 
-    // Enhanced order details modal with better UX
-    function viewOrderDetails(requestId) {
+    function viewOrderDetails(btn) {
+    // Get the raw JSON string
+    let jsonString = btn.getAttribute('data-details');
+
+    try {
+        // First try parsing without any modifications
+        const order = JSON.parse(jsonString);
+        showOrderDetails(order);
+        return;
+    } catch (e) {
+        console.log('First parse failed, trying Unicode decode...');
+    }
+
+    try {
+        // Decode Unicode escape sequences (\u0022 -> ")
+        jsonString = jsonString.replace(/\\u([0-9a-fA-F]{4})/g, function (match, grp) {
+            return String.fromCharCode(parseInt(grp, 16));
+        });
+
+        // Try parsing the decoded string
+        const order = JSON.parse(jsonString);
+        showOrderDetails(order);
+        return;
+    } catch (e) {
+        console.log('Unicode decode failed, trying manual fixes...');
+    }
+
+    try {
+        // Try fixing common escape issues
+        jsonString = jsonString
+            .replace(/\\"/g, '"')          // Fix escaped quotes
+            .replace(/\\\\/g, '\\')        // Fix double backslashes
+            .replace(/\\n/g, '\n')         // Fix newlines
+            .replace(/\\r/g, '\r')         // Fix carriage returns
+            .replace(/\\t/g, '\t');        // Fix tabs
+
+        const order = JSON.parse(jsonString);
+        showOrderDetails(order);
+        return;
+    } catch (e) {
+        console.error('All JSON parsing attempts failed:', e);
+        console.log('Raw JSON string:', jsonString);
+
+        // Show error in modal
         const modal = document.getElementById('orderDetailsModal');
         const content = document.getElementById('orderDetailsContent');
-
-        // Show loading state
-        content.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);"><i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 1rem;"></i><br>Loading order details...</div>';
+        content.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: var(--error-color);">
+                <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem; margin-bottom: 1rem;"></i>
+                <br>Failed to load order details. Invalid JSON format.
+                <br><br>
+                <button class="btn-tech btn-secondary" onclick="closeOrderDetailsModal()">Close</button>
+            </div>
+        `;
         modal.style.display = 'flex';
         modal.classList.add('active');
         modal.setAttribute('aria-hidden', 'false');
-
-        // Fetch order details from server
-        fetch(`/Orders/GetOrderDetails/${requestId}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch order details');
-                }
-                return response.json();
-            })
-            .then(order => {
-                // Call the enhanced display function
-                displayOrderDetails(order);
-            })
-            .catch(error => {
-                console.error('Error fetching order details:', error);
-                content.innerHTML = `
-                <div style="text-align: center; padding: 2rem; color: var(--error-color);">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem; margin-bottom: 1rem;"></i>
-                    <br>Failed to load order details. Please try again.
-                    <br><br>
-                    <button class="btn-tech btn-primary" onclick="viewOrderDetails(${requestId})">
-                        <i class="fas fa-redo"></i> Retry
-                    </button>
-                </div>
-            `;
-            });
     }
+}
+
+function showOrderDetails(order) {
+    const modal = document.getElementById('orderDetailsModal');
+    const content = document.getElementById('orderDetailsContent');
+
+    // Show loading state
+    content.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);"><i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 1rem;"></i><br>Loading order details...</div>';
+    modal.style.display = 'flex';
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+
+    // Pass the order to displayOrderDetails
+    setTimeout(() => {
+        displayOrderDetails(order);
+    }, 200);
+}
 
 
     function displayOrderDetails(order) {
         let requestDetailsHtml = '';
+        console.log(order);
 
         // Parse and display request details if they exist
-        if (order.requestDetails) {
+        // Fix: Use request_details (snake_case) instead of requestDetails (camelCase)
+        if (order.request_details) {
             try {
-                const details = JSON.parse(order.requestDetails);
+                const details = JSON.parse(order.request_details);
+                console.log(details);
 
                 // Handle Pentesting Service Details
                 if (details.TargetSystem && details.TestingObjectives) {
@@ -1524,15 +1578,15 @@
                     ${details.PortType ? `<p><strong>Port Type:</strong> ${details.PortType}</p>` : ''}
                     ${details.NetworkSpeed ? `<p><strong>Network Speed:</strong> ${details.NetworkSpeed.replace('Speed', '').replace('Mbps', ' Mbps').replace('Gbps', ' Gbps')}</p>` : ''}
                     ${details.VlanAssignment ? `<p><strong>VLAN Assignment:</strong> ${details.VlanAssignment}</p>` : ''}
-                    ${details.WirelessAccessRequired ? `<p><strong>Wireless Access Required:</strong> ${details.WirelessAccessRequired ? 'Yes' : 'No'}</p>` : ''}
-                    ${details.SpecialSecurityRequired ? `<p><strong>Special Security Required:</strong> ${details.SpecialSecurityRequired ? 'Yes' : 'No'}</p>` : ''}
-                    ${details.HardwareInstallationRequired ? `<p><strong>Hardware Installation:</strong> ${details.HardwareInstallationRequired ? 'Yes' : 'No'}</p>` : ''}
+                    ${details.WirelessAccessRequired !== undefined ? `<p><strong>Wireless Access Required:</strong> ${details.WirelessAccessRequired ? 'Yes' : 'No'}</p>` : ''}
+                    ${details.SpecialSecurityRequired !== undefined ? `<p><strong>Special Security Required:</strong> ${details.SpecialSecurityRequired ? 'Yes' : 'No'}</p>` : ''}
+                    ${details.HardwareInstallationRequired !== undefined ? `<p><strong>Hardware Installation:</strong> ${details.HardwareInstallationRequired ? 'Yes' : 'No'}</p>` : ''}
                 </div>
                 <div class="detail-section">
                     <h4>📅 Schedule & Preferences</h4>
                     ${details.RequestedCompletionDate ? `<p><strong>Requested Completion:</strong> ${new Date(details.RequestedCompletionDate).toLocaleDateString()}</p>` : ''}
                     ${details.PreferredInstallationTime ? `<p><strong>Installation Time:</strong> ${details.PreferredInstallationTime.replace(/([A-Z])/g, ' $1').trim()}</p>` : ''}
-                    ${details.IsUrgent ? `<p><strong>Urgent Request:</strong> ${details.IsUrgent ? 'Yes' : 'No'}</p>` : ''}
+                    ${details.IsUrgent !== undefined ? `<p><strong>Urgent Request:</strong> ${details.IsUrgent ? 'Yes' : 'No'}</p>` : ''}
                     ${details.AvailableDays && details.AvailableDays.length > 0 ? `<p><strong>Available Days:</strong> ${details.AvailableDays.join(', ')}</p>` : ''}
                 </div>
                 <div class="detail-section">
@@ -1594,26 +1648,27 @@
                 }
             } catch (e) {
                 // If JSON parsing fails, show raw text
-                requestDetailsHtml = `<div class="detail-section"><h4>📄 Request Details</h4><p>${order.requestDetails}</p></div>`;
+                requestDetailsHtml = `<div class="detail-section"><h4>📄 Request Details</h4><p>${order.request_details}</p></div>`;
             }
         }
 
+        // Also fix the property references in the main content section
         const content = `
     <div class="detail-section">
         <h4>🔧 Service Information</h4>
-        <p><strong>Service:</strong> ${order.serviceName || 'N/A'}</p>
-        <p><strong>Category:</strong> ${order.categoryName || 'N/A'}</p>
-        <p><strong>Description:</strong> ${order.serviceDescription || 'N/A'}</p>
+        <p><strong>Service:</strong> ${order.service_name || 'N/A'}</p>
+        <p><strong>Category:</strong> ${order.category_name || 'N/A'}</p>
+        <p><strong>Description:</strong> ${order.service_description || 'N/A'}</p>
     </div>
     <div class="detail-section">
         <h4>📋 Order Status</h4>
-        <p><strong>Order ID:</strong> ${order.requestId}</p>
-        <p><strong>Status:</strong> <span class="status-badge status-${order.statusName?.toLowerCase()}" style="background-color: ${order.statusColorCode}">${order.statusName}</span></p>
-        <p><strong>Priority:</strong> ${order.priorityText}</p>
-        <p><strong>Requested:</strong> ${order.formattedRequestedDate}</p>
-        ${order.formattedCompletionDate ? `<p><strong>Completed:</strong> ${order.formattedCompletionDate}</p>` : ''}
-        <p><strong>Amount:</strong> ${order.formattedTotalAmount}</p>
-        ${order.approverFullName && order.approverFullName !== 'System' ? `<p><strong>Approved By:</strong> ${order.approverFullName}</p>` : ''}
+        <p><strong>Order ID:</strong> ${order.request_id}</p>
+        <p><strong>Status:</strong> <span class="status-badge status-${order.status_name?.toLowerCase()}" style="background-color: ${order.status_color_code}; color:white;">${order.status_name}</span></p>
+        <p><strong>Priority:</strong> ${order.PriorityText}</p>
+        <p><strong>Requested:</strong> ${order.FormattedRequestedDate}</p>
+        ${order.FormattedCompletionDate ? `<p><strong>Completed:</strong> ${order.FormattedCompletionDate}</p>` : ''}
+        <p><strong>Amount:</strong> ${order.FormattedTotalAmount}</p>
+        ${order.ApproverFullName && order.ApproverFullName !== 'System' ? `<p><strong>Approved By:</strong> ${order.ApproverFullName}</p>` : ''}
     </div>
     ${requestDetailsHtml}
     ${order.notes ? `<div class="detail-section"><h4>📝 Internal Notes</h4><p>${order.notes}</p></div>` : ''}
@@ -1631,13 +1686,143 @@
         }, 400);
     }
 
-    function editOrder(requestId) {
-        window.location.href = `@Url.Action("Edit", "ServiceRequest")?id=${requestId}`;
+    // Modal for payment simulation
+    function startPayment(requestId, amount) {
+        // Create or reuse a modal for payment
+        let paymentModal = document.getElementById('paymentModal');
+        if (!paymentModal) {
+            paymentModal = document.createElement('div');
+            paymentModal.id = 'paymentModal';
+            paymentModal.className = 'modal';
+            paymentModal.innerHTML = `
+                <div class="modal-content" style="max-width:400px;">
+                    <div class="modal-header">
+                        <h3>Payment</h3>
+                        <button class="modal-close" onclick="closePaymentModal()" aria-label="Close payment modal">×</button>
+                    </div>
+                    <div class="modal-body" id="paymentModalBody">
+                        <div style="text-align:center;padding:2rem;color:white;">
+                            <div style="font-size:2rem;margin-bottom:1rem;"><i class="fas fa-credit-card"></i></div>
+                            <div>Preparing payment for <strong>${amount}</strong>...</div>
+                            <div id="paymentProgressBar" style="margin: 2rem 0 1rem 0;">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width:0%;" id="paymentProgressFill"></div>
+                                </div>
+                                <span id="paymentProgressText">0%</span>
+                            </div>
+                            <button class="btn-tech btn-primary" id="payNowBtn" onclick="simulatePayment()">Pay Now</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(paymentModal);
+        }
+        paymentModal.style.display = 'flex';
+        setTimeout(() => paymentModal.classList.add('active'), 50);
     }
 
-    function downloadReceipt(requestId) {
-        window.open(`@Url.Action("DownloadReceipt", "Profile")?requestId=${requestId}`, '_blank');
+    function closePaymentModal() {
+        let paymentModal = document.getElementById('paymentModal');
+        if (paymentModal) {
+            paymentModal.classList.remove('active');
+            setTimeout(() => paymentModal.style.display = 'none', 400);
+        }
     }
+
+    function simulatePayment() {
+        // Disable the button
+        const btn = document.getElementById('payNowBtn');
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+
+        let progress = 0;
+        const fill = document.getElementById('paymentProgressFill');
+        const text = document.getElementById('paymentProgressText');
+
+        function step() {
+            progress += Math.random() * 18 + 10; // random step
+            if (progress >= 100) {
+                progress = 100;
+                fill.style.width = progress + '%';
+                text.textContent = '100%';
+                setTimeout(() => {
+                    // Show payment success and notification message
+                    const body = document.getElementById('paymentModalBody');
+                    body.innerHTML = `
+                        <div style="text-align:center;padding:2rem;color:white;">
+                            <div style="font-size:2rem;margin-bottom:1rem;"><i class="fas fa-check-circle" style="color:var(--success-color);"></i></div>
+                            <div style="font-size:1.2rem; font-weight:700; margin-bottom:1rem;">Payment Successful!</div>
+                            <div>Thank you for your payment. We will notify you when we start working on your order.</div>
+                            <button class="btn-tech btn-primary" onclick="closePaymentModal()">OK</button>
+                        </div>
+                    `;
+                }, 700);
+            } else {
+                fill.style.width = progress + '%';
+                text.textContent = Math.round(progress) + '%';
+                setTimeout(step, 300);
+            }
+        }
+        setTimeout(step, 300);
+    }
+
+    // Close payment modal on ESC and click outside
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closePaymentModal();
+    });
+    document.addEventListener('click', function (e) {
+        let paymentModal = document.getElementById('paymentModal');
+        if (paymentModal && paymentModal.classList.contains('active') && e.target === paymentModal) {
+            closePaymentModal();
+        }
+    });
+
+    function downloadReceipt(btn) {
+    // Get the full order object from the button's data attribute
+    let jsonString = btn.getAttribute('data-details');
+
+    try {
+        // Decode and parse the order data (using same logic as viewOrderDetails)
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = jsonString;
+        jsonString = textarea.value;
+
+        jsonString = jsonString.replace(/\\u([0-9a-fA-F]{4})/g, function (match, grp) {
+            return String.fromCharCode(parseInt(grp, 16));
+        });
+
+        const order = JSON.parse(jsonString);
+
+        // Create a form and submit the order data as POST
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '@Url.Action("DownloadReceipt", "Profile")';
+        form.target = '_blank';
+
+        // Add the order data as a hidden input
+        const orderInput = document.createElement('input');
+        orderInput.type = 'hidden';
+        orderInput.name = 'orderData';
+        orderInput.value = JSON.stringify(order);
+        form.appendChild(orderInput);
+
+        // Add anti-forgery token
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = '__RequestVerificationToken';
+        tokenInput.value = '@Html.AntiForgeryToken()'.match(/value="([^"]+)"/)[1];
+        form.appendChild(tokenInput);
+
+        // Submit the form
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+
+    } catch (error) {
+        console.error('Error preparing receipt download:', error);
+        alert('Failed to prepare receipt download. Please try again.');
+    }
+}
 
     // Enhanced keyboard navigation
     document.addEventListener('keydown', (e) => {

@@ -311,7 +311,7 @@
             font-size: 0.9rem;
         }
 
-        .edit-button {
+        .edit-button, .save-button, .cancel-button {
             background: linear-gradient(135deg, var(--primary-color), var(--primary-dim));
             color: var(--dark-bg);
             border: none;
@@ -322,13 +322,76 @@
             cursor: pointer;
             transition: var(--transition);
             box-shadow: 0 5px 15px var(--primary-glow);
-            margin-top: 1rem;
+            margin: 0.5rem;
         }
 
-            .edit-button:hover {
+            .edit-button:hover, .save-button:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 8px 25px var(--primary-glow);
                 background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+            }
+
+        .cancel-button {
+            background: linear-gradient(135deg, var(--error-color), #ff4444);
+            box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
+        }
+
+            .cancel-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(255, 68, 68, 0.5);
+            }
+
+        .edit-input {
+            background: var(--input-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: var(--text-bright);
+            font-size: 1.1rem;
+            width: 100%;
+            transition: var(--transition);
+        }
+
+            .edit-input:focus {
+                outline: none;
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.2);
+            }
+
+        .edit-mode {
+            display: none;
+        }
+
+            .edit-mode.active {
+                display: block;
+            }
+
+        .view-mode.editing {
+            display: none;
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-weight: 500;
+        }
+
+            .message.success {
+                background: rgba(0, 255, 136, 0.1);
+                color: var(--success-color);
+                border: 1px solid var(--success-color);
+            }
+
+            .message.error {
+                background: rgba(255, 68, 68, 0.1);
+                color: var(--error-color);
+                border: 1px solid var(--error-color);
             }
 
         @@keyframes slideInDown {
@@ -398,6 +461,9 @@
             <p class="profile-subtitle">Manage your account information and preferences</p>
         </div>
 
+        <!--Message container for success/error messages -->
+        <div id="messageContainer"></div>
+
         <div class="profile-grid">
             <!-- Avatar Section -->
             <div class="profile-card avatar-section">
@@ -408,9 +474,20 @@
                 </div>
                 <div class="user-name">@(Model.FirstName + " " + Model.LastName)</div>
                 <div class="user-role">@(Model.RoleName ?? "None")</div>
-                <button class="edit-button" onclick="toggleEditMode()">
-                    <i class="fas fa-edit"></i> Edit Profile
-                </button>
+                <div id="edit-buttons">
+                    <button class="edit-button" onclick="toggleEditMode()">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </button>
+                </div>
+
+                <div id="save-buttons" style="display: none;">
+                    <button class="save-button" onclick="saveProfile()">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <button class="cancel-button" onclick="cancelEdit()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
             </div>
 
             <!-- Information Section -->
@@ -429,19 +506,34 @@
                         <div class="info-label">
                             <i class="fas fa-user"></i> First Name
                         </div>
-                        <div class="info-value">@(Model.FirstName ?? "N/A")</div>
+                        <div class="view-mode">
+                            <div class="info-value" id="display-firstname">@(Model.FirstName ?? "N/A")</div>
+                        </div>
+                        <div class="edit-mode">
+                            <input type="text" class="edit-input" id="edit-firstname" value="@Model.FirstName" placeholder="Enter first name" />
+                        </div>
                     </div>
                     <div class="info-item">
                         <div class="info-label">
                             <i class="fas fa-user"></i> Last Name
                         </div>
-                        <div class="info-value">@(Model.LastName ?? "N/A")</div>
+                        <div class="view-mode">
+                            <div class="info-value" id="display-lastname">@(Model.LastName ?? "N/A")</div>
+                        </div>
+                        <div class="edit-mode">
+                            <input type="text" class="edit-input" id="edit-lastname" value="@Model.LastName" placeholder="Enter last name" />
+                        </div>
                     </div>
                     <div class="info-item">
                         <div class="info-label">
                             <i class="fas fa-phone"></i> Phone Number
                         </div>
-                        <div class="info-value">@(Model.PhoneNumber ?? "N/A")</div>
+                        <div class="view-mode">
+                            <div class="info-value" id="display-phone">@(Model.PhoneNumber ?? "N/A")</div>
+                        </div>
+                        <div class="edit-mode">
+                            <input type="tel" class="edit-input" id="edit-phone" value="@Model.PhoneNumber" placeholder="Enter phone number" />
+                        </div>
                     </div>
                     <div class="info-item">
                         <div class="info-label">
@@ -498,8 +590,152 @@
 
 @section Scripts {
     <script>
+        let isEditMode = false;
+        let originalValues = {};
+
         function toggleEditMode() {
-            alert('Edit functionality will be implemented in future updates.');
+            isEditMode = true;
+
+            // Store original values
+            originalValues = {
+                firstName: document.getElementById('edit-firstname').value,
+                lastName: document.getElementById('edit-lastname').value,
+                phoneNumber: document.getElementById('edit-phone').value
+            };
+
+            // Show edit mode
+            document.querySelectorAll('.edit-mode').forEach(el => el.classList.add('active'));
+            document.querySelectorAll('.view-mode').forEach(el => el.classList.add('editing'));
+
+            // Toggle buttons
+            document.getElementById('edit-buttons').style.display = 'none';
+            document.getElementById('save-buttons').style.display = 'block';
+
+            // Clear any existing messages
+            clearMessages();
+        }
+
+        function cancelEdit() {
+            isEditMode = false;
+
+            // Restore original values
+            document.getElementById('edit-firstname').value = originalValues.firstName || '';
+            document.getElementById('edit-lastname').value = originalValues.lastName || '';
+            document.getElementById('edit-phone').value = originalValues.phoneNumber || '';
+
+            // Hide edit mode
+            document.querySelectorAll('.edit-mode').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.view-mode').forEach(el => el.classList.remove('editing'));
+
+            // Toggle buttons
+            document.getElementById('edit-buttons').style.display = 'block';
+            document.getElementById('save-buttons').style.display = 'none';
+
+            // Clear any existing messages
+            clearMessages();
+        }
+
+        async function saveProfile() {
+            const firstName = document.getElementById('edit-firstname').value.trim();
+            const lastName = document.getElementById('edit-lastname').value.trim();
+            const phoneNumber = document.getElementById('edit-phone').value.trim();
+
+            // Basic validation
+            if (!firstName) {
+                showMessage('First name is required', 'error');
+                return;
+            }
+
+            if (!lastName) {
+                showMessage('Last name is required', 'error');
+                return;
+            }
+
+            // Show loading state
+            setLoadingState(true);
+
+            try {
+                // Get anti-forgery token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value ||
+                             document.querySelector('meta[name="__RequestVerificationToken"]')?.content;
+
+                const formData = new FormData();
+                formData.append('firstName', firstName);
+                formData.append('lastName', lastName);
+                formData.append('phoneNumber', phoneNumber);
+
+                if (token) {
+                    formData.append('__RequestVerificationToken', token);
+                }
+
+                const response = await fetch('@Url.Action("UpdateProfileAsync", "Account")', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Update display values
+                    document.getElementById('display-firstname').textContent = firstName;
+                    document.getElementById('display-lastname').textContent = lastName;
+                    document.getElementById('display-phone').textContent = phoneNumber || 'N/A';
+                    document.getElementById('display-name').textContent = `${firstName} ${lastName}`;
+
+                    // Update avatar initials
+                    const initials = (firstName[0] || '') + (lastName[0] || '');
+                    document.getElementById('user-initials').textContent = initials.toUpperCase();
+
+                    // Exit edit mode
+                    isEditMode = false;
+                    document.querySelectorAll('.edit-mode').forEach(el => el.classList.remove('active'));
+                    document.querySelectorAll('.view-mode').forEach(el => el.classList.remove('editing'));
+                    document.getElementById('edit-buttons').style.display = 'block';
+                    document.getElementById('save-buttons').style.display = 'none';
+
+                    showMessage(result.message || 'Profile updated successfully!', 'success');
+                } else {
+                    showMessage(result.message || 'Failed to update profile', 'error');
+                }
+
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                showMessage('An error occurred while updating your profile. Please try again.', 'error');
+            } finally {
+                setLoadingState(false);
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('messageContainer');
+            messageContainer.innerHTML = `<div class="message ${type}">${message}</div>`;
+
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    clearMessages();
+                }, 5000);
+            }
+        }
+
+        function clearMessages() {
+            document.getElementById('messageContainer').innerHTML = '';
+        }
+
+        function setLoadingState(loading) {
+            const container = document.querySelector('.profile-container');
+            if (loading) {
+                container.classList.add('loading');
+            } else {
+                container.classList.remove('loading');
+            }
         }
 
         // Remove loading states (not needed with server-side rendering)
@@ -508,3 +744,5 @@
         });
     </script>
 }
+
+@Html.AntiForgeryToken()

@@ -1,4 +1,9 @@
 ﻿<footer class="footer">
+    <div class="section-background">
+        <div class="tech-grid"></div>
+        <div class="glow-circle"></div>
+    </div>
+
     <div class="footer-content">
         <div class="footer-left">
             <img src="~/Content/Images/Logo_SecuDev.png" alt="SecuDev Logo" class="footer-logo" />
@@ -28,13 +33,14 @@
     .footer {
         position: relative;
         width: 100%;
-        height: 100px;
+        min-height: 120px;
         padding: 40px 20px;
-        background-color: #0d1117; /* Matches .what-we-do-section */
+        background-color: #0d1117;
         display: flex;
         align-items: center;
         justify-content: center;
         overflow: hidden;
+        margin-top: auto;
     }
 
     .footer-content {
@@ -44,7 +50,7 @@
         justify-content: space-between;
         align-items: center;
         padding: 0 20px;
-        gap: 50px;
+        gap: 30px;
         position: relative;
         z-index: 2;
     }
@@ -76,8 +82,14 @@
         border-radius: 50%;
         background: radial-gradient(circle, rgba(0, 255, 247, 0.1) 0%, rgba(13, 17, 23, 0) 70%);
         bottom: -250px;
-        right: -100px; /* Matches .what-we-do-section */
+        right: -100px;
         z-index: 1;
+    }
+
+    .footer-left {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
     }
 
     .footer-logo {
@@ -90,13 +102,18 @@
         display: flex;
         gap: 20px;
         flex-wrap: wrap;
+        justify-content: center;
         z-index: 2;
+        flex: 1;
+        min-width: 0;
     }
 
     .footer-right {
         display: flex;
         gap: 20px;
         z-index: 2;
+        flex-shrink: 0;
+        align-items: center;
     }
 
     .nav-link-ft {
@@ -105,20 +122,234 @@
         font-family: 'Share Tech Mono', monospace;
         font-size: 14px;
         transition: color 0.3s ease;
+        white-space: nowrap;
+        padding: 5px 0;
     }
 
-        .nav-link-ft:hover {
-            color: #00FFF7;
-        }
+    .nav-link-ft:hover {
+        color: #00FFF7;
+    }
+
+    .social-icon {
+        display: inline-block;
+        transition: transform 0.3s ease;
+    }
 
     .social-icon img {
         width: 24px;
         height: 24px;
         transition: transform 0.3s ease, filter 0.3s ease;
+        display: block;
     }
 
     .social-icon:hover img {
         transform: scale(1.2);
         filter: drop-shadow(0 0 5px #00FFF7);
+    }
+
+    /* Tablet styles */
+    @@media (max-width: 1024px) {
+        .footer {
+            padding: 30px 15px;
+            min-height: 110px;
+        }
+
+        .footer-content {
+            gap: 25px;
+            padding: 0 15px;
+        }
+
+        .footer-center {
+            gap: 15px;
+        }
+
+        .nav-link-ft {
+            font-size: 13px;
+        }
+
+        .footer-logo {
+            height: 60px;
+        }
+
+        .glow-circle {
+            width: 400px;
+            height: 400px;
+            bottom: -200px;
+            right: -80px;
+        }
+    }
+
+    /* Mobile landscape and portrait */
+    @@media (max-width: 768px) {
+        .footer {
+            padding: 30px 15px;
+            min-height: 200px;
+        }
+
+        .footer-content {
+            flex-direction: column;
+            gap: 25px;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer-left {
+            order: 1;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .footer-center {
+            order: 2;
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .footer-right {
+            order: 3;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .footer-logo {
+            height: 55px;
+        }
+
+        .nav-link-ft {
+            font-size: 13px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link-ft:hover {
+            background-color: rgba(0, 255, 247, 0.1);
+        }
+
+        .social-icon {
+            margin: 0 5px;
+        }
+
+        .social-icon img {
+            width: 28px;
+            height: 28px;
+        }
+
+        .glow-circle {
+            width: 300px;
+            height: 300px;
+            bottom: -150px;
+            right: 50%;
+            transform: translateX(50%);
+        }
+
+        .tech-grid {
+            background-size: 30px 30px;
+        }
+    }
+
+    /* Small mobile */
+    @@media (max-width: 480px) {
+        .footer {
+            padding: 25px 10px;
+            min-height: 250px;
+        }
+
+        .footer-content {
+            gap: 20px;
+            padding: 0 10px;
+        }
+
+        .footer-center {
+            gap: 15px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .nav-link-ft {
+            font-size: 14px;
+            padding: 10px 15px;
+            margin: 2px 0;
+            width: 200px;
+            text-align: center;
+            border: 1px solid rgba(0, 255, 247, 0.2);
+            border-radius: 6px;
+            background-color: rgba(0, 255, 247, 0.05);
+        }
+
+        .nav-link-ft:hover {
+            background-color: rgba(0, 255, 247, 0.15);
+            border-color: rgba(0, 255, 247, 0.4);
+        }
+
+        .footer-logo {
+            height: 45px;
+        }
+
+        .social-icon {
+            margin: 0 8px;
+        }
+
+        .social-icon img {
+            width: 32px;
+            height: 32px;
+        }
+
+        .glow-circle {
+            width: 250px;
+            height: 250px;
+            bottom: -125px;
+            right: 50%;
+            transform: translateX(50%);
+        }
+
+        .tech-grid {
+            background-size: 25px 25px;
+        }
+    }
+
+    /* Very small screens */
+    @@media (max-width: 320px) {
+        .footer {
+            padding: 20px 8px;
+            min-height: 280px;
+        }
+
+        .footer-content {
+            gap: 15px;
+            padding: 0 5px;
+        }
+
+        .footer-center {
+            gap: 12px;
+        }
+
+        .nav-link-ft {
+            font-size: 13px;
+            padding: 8px 12px;
+            width: 180px;
+        }
+
+        .footer-logo {
+            height: 40px;
+        }
+
+        .social-icon img {
+            width: 30px;
+            height: 30px;
+        }
+
+        .glow-circle {
+            width: 200px;
+            height: 200px;
+            bottom: -100px;
+        }
+
+        .tech-grid {
+            background-size: 20px 20px;
+        }
     }
 </style>

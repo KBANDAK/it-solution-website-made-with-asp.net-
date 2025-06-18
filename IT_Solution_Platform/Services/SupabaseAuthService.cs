@@ -225,6 +225,50 @@ namespace IT_Solution_Platform.Services
                 throw new Exception($"Failed to get user : {ex.Message}", ex);
             }
         }
+
+
+        public async Task<(bool success, string message)> UpdateUser(string userSId, string firstName , string lastName, string phoneNumber)
+        {
+            try
+            {
+                // Validate user object
+                if ( string.IsNullOrEmpty(userSId) || string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName) || string.IsNullOrWhiteSpace(phoneNumber))
+                {
+                    return (false, $"Email , Firstname, Lastname or Phonenumber is null {userSId} ... {firstName} ... , {lastName} ... ,{phoneNumber}");
+                    
+                }
+
+                // Make sure you're authenticated
+                var currentUser = _supabaseClient.Auth.CurrentUser;
+                if (currentUser == null)
+                {
+                    return (false, "User not authenticated");
+                }
+
+                Guid uid = Guid.Parse(userSId);
+
+
+                // Method 1: Update using Set method (Recommended)
+                var result = await _supabaseClient
+                    .From<Models.User>()
+                    .Where(u => u.supabase_uid == uid)
+                    .Set(u => u.first_name, firstName)
+                    .Set(u => u.last_name, lastName)
+                    .Set(u => u.phone_number, phoneNumber)
+                    .Update();
+
+
+                if (result == null)
+                {
+                    return (false, $"Update user failed with updated is (Possiable null): {result}");
+                }
+                return (result.ResponseMessage.IsSuccessStatusCode, "User updated successfully!");
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Update user failed with ex: {ex}");
+            }
+        }
         public Task<(bool Success, string Message)> ConfirmEmailAsync(string userId, string token)
         {
             throw new NotImplementedException();

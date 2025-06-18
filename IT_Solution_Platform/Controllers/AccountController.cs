@@ -663,17 +663,18 @@ namespace IT_Solution_Platform.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public JsonResult UpdateProfile(string firstName, string lastName, string phoneNumber)
+        public async Task<JsonResult> UpdateProfileAsync(string firstName, string lastName, string phoneNumber)
         {
             try
             {
                 // Get user ID from claims (ASP.NET Framework approach)
                 var claimsIdentity = User.Identity as ClaimsIdentity;
-                var userIdClaim = claimsIdentity?.FindFirst("UserId")?.Value;
+                var userIdClaim = claimsIdentity?.FindFirst("SupabaseUserId")?.Value;
+                int userId = Int32.Parse(claimsIdentity?.FindFirst("UserId")?.Value);
 
-                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                if (string.IsNullOrEmpty(userIdClaim) || userId <= 0)
                 {
-                    return Json(new { success = false, message = "User not found in session" });
+                    return Json(new { success = false, message = "User not found." });
                 }
 
                 // Validate input
@@ -687,24 +688,10 @@ namespace IT_Solution_Platform.Controllers
                     return Json(new { success = false, message = "Last name is required" });
                 }
 
-                // Update user profile
-                var updateQuery = @"
-            UPDATE users 
-            SET first_name = @FirstName, 
-                last_name = @LastName, 
-                phone_number = @PhoneNumber, 
-                updated_at = GETDATE() 
-            WHERE user_id = @UserId";
+                // Update user
+                var result = await _authService.UpdateUser(userIdClaim, firstName, lastName, phoneNumber);
 
-                var result = _databaseService.ExecuteNonQuery(updateQuery, new
-                {
-                    FirstName = firstName.Trim(),
-                    LastName = lastName.Trim(),
-                    PhoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? null : phoneNumber.Trim(),
-                    UserId = userId
-                });
-
-                if (result > 0)
+                if (result.success)
                 {
                     // Log successful update
                     _auditLogService.LogAudit(
@@ -715,7 +702,8 @@ namespace IT_Solution_Platform.Controllers
                         new
                         {
                             Action = "Update Profile",
-                            Changes = new { FirstName = firstName, LastName = lastName, PhoneNumber = phoneNumber }
+                            Changes = new { FirstName = firstName, LastName = lastName, PhoneNumber = phoneNumber },
+                            Message = result.message
                         },
                         Request.UserHostAddress ?? "Unknown",
                         Request.UserAgent ?? "Unknown"
@@ -725,6 +713,22 @@ namespace IT_Solution_Platform.Controllers
                 }
                 else
                 {
+                    // Log successful update
+                    _auditLogService.LogAudit(
+                        userId,
+                        "Profile Update Failed",
+                        "Profile",
+                        userId,
+                        new
+                        {
+                            Action = "Update Profile",
+                            Changes = new { FirstName = firstName, LastName = lastName, PhoneNumber = phoneNumber },
+                            Error = result.message
+                        },
+                        Request.UserHostAddress ?? "Unknown",
+                        Request.UserAgent ?? "Unknown"
+                    );
+
                     return Json(new { success = false, message = "No changes were made to your profile" });
                 }
             }
@@ -734,7 +738,7 @@ namespace IT_Solution_Platform.Controllers
                 var claimsIdentity = User.Identity as ClaimsIdentity;
                 var userIdForLog = claimsIdentity?.FindFirst("UserId")?.Value ?? "Unknown";
                 _auditLogService.LogAudit(
-                    0,
+                    Int32.Parse(userIdForLog),
                     "Profile Update Error",
                     "Profile",
                     null,

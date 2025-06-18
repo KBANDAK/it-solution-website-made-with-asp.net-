@@ -5,8 +5,10 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using IT_Solution_Platform.Helpers;
 using IT_Solution_Platform.Models;
 using IT_Solution_Platform.Services;
+using Newtonsoft.Json;
 
 namespace IT_Solution_Platform.Controllers
 {
@@ -96,6 +98,37 @@ namespace IT_Solution_Platform.Controllers
 
                 TempData["Error"] = "An error occurred while loading your service orders. Please try again.";
                 return View("ServiceOrdersAsync", new List<ServiceRequestDetailViewModel>());
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DownloadReceipt(string orderData)
+        {
+            try
+            {
+                // Parse the order data
+                var order = JsonConvert.DeserializeObject<ServiceRequestDetailViewModel>(orderData);
+
+                // Generate PDF using the helper class
+                var pdfBytes = PdfGenerator.GenerateReceiptPdf(order);
+
+                // Return PDF file with a descriptive filename
+                var fileName = $"Secudev_Receipt_{order.request_id:D6}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.pdf";
+
+                return File(pdfBytes, "application/pdf", fileName);
+            }
+            catch (JsonException jsonEx)
+            {
+                // Log JSON parsing error
+                // Logger.Error($"JSON parsing error in DownloadReceipt: {jsonEx.Message}", jsonEx);
+                return new HttpStatusCodeResult(400, "Invalid order data format");
+            }
+            catch (Exception ex)
+            {
+                // Log general error
+                // Logger.Error($"Error generating receipt for user Moody03: {ex.Message}", ex);
+                return new HttpStatusCodeResult(500, "Error generating receipt. Please try again.");
             }
         }
 

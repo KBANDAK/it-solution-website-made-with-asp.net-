@@ -54,7 +54,6 @@
             </div>
 
             <div class="values-container">
-
                 <div class="value-item animate__animated animate__fadeInUp animate__delay-1s">
                     <div class="value-icon">
                         <img src="~/Content/Images/Icons/encrypted (1).png" alt="Security Icon" width="36" height="36" />
@@ -94,9 +93,7 @@
                     <h4>Client-Centered Partnership</h4>
                     <p>We work closely with our clients — listening, adapting, and delivering solutions that match their goals.</p>
                 </div>
-
             </div>
-
         </div>
     </div>
 
@@ -159,9 +156,7 @@
             <!-- Team Member 3 -->
             <div class="team-card animate__animated animate__fadeInUp animate__delay-2s">
                 <div class="member-photo">
-                    <div class="photo-placeholder">
-
-                    </div>
+                    <div class="photo-placeholder"></div>
                     <div class="tech-scan"></div>
                 </div>
                 <div class="member-info">
@@ -179,9 +174,7 @@
             <!-- Team Member 4 -->
             <div class="team-card animate__animated animate__fadeInUp animate__delay-2s">
                 <div class="member-photo">
-                    <div class="photo-placeholder">
-
-                    </div>
+                    <div class="photo-placeholder"></div>
                     <div class="tech-scan"></div>
                 </div>
                 <div class="member-info">
@@ -215,7 +208,6 @@
         </div>
 
         <div class="features-grid">
-
             <div class="feature-card animate__animated animate__fadeInUp">
                 <div class="feature-icon">
                     <img src="~/Content/Images/Icons/quality.png" alt="Expertise Icon" width="40" height="40" />
@@ -248,11 +240,10 @@
                     <img src="~/Content/Images/Icons/support.png" alt="Support Icon" width="40" height="40" />
                 </div>
                 <h3 class="feature-title">Ongoing Support</h3>
-                <p class="feature-description">We don’t just deliver — we stay with you. Our support ensures your systems stay secure, up-to-date, and running smoothly.</p>
+                <p class="feature-description">We don't just deliver — we stay with you. Our support ensures your systems stay secure, up-to-date, and running smoothly.</p>
                 <div class="data-line"></div>
             </div>
         </div>
-
     </div>
 
     <!-- Background elements -->
@@ -265,7 +256,7 @@
         <div class="cta-container animate__animated animate__fadeIn">
             <div class="cta-content">
                 <h2 class="cta-title">Ready to Build, Secure, and Scale Your Digital Infrastructure?</h2>
-                <p class="cta-text">Whether you need a robust app, airtight security, or a reliable network setup — we’re your all-in-one tech partner.</p>
+                <p class="cta-text">Whether you need a robust app, airtight security, or a reliable network setup — we're your all-in-one tech partner.</p>
                 <a href="@Url.Action("Contact", "Home")" class="cta-button">
                     <span class="button-text">Get Started</span>
                     <span class="button-icon">→</span>
@@ -312,7 +303,7 @@
         justify-content: center;
         width: 100%;
         margin: 0;
-        padding: 0;
+        padding: 80px 0 40px;
         background-color: #0d1117;
     }
 
@@ -408,6 +399,7 @@
         font-size: 20px;
         color: #FFFFFF;
         margin-bottom: 40px;
+        line-height: 1.4;
     }
 
     .tech-badge {
@@ -444,7 +436,7 @@
     /* Mission Section */
     .mission-section {
         position: relative;
-        padding: 100px 0;
+        padding: 80px 0;
         background-color: #0d1117;
         overflow: hidden;
     }
@@ -482,9 +474,9 @@
         flex-grow: 1;
     }
 
-        .line-segment:last-child {
-            background: linear-gradient(90deg, rgba(0, 255, 247, 0.7), rgba(0, 255, 247, 0));
-        }
+    .line-segment:last-child {
+        background: linear-gradient(90deg, rgba(0, 255, 247, 0.7), rgba(0, 255, 247, 0));
+    }
 
     .line-dot {
         width: 8px;
@@ -494,18 +486,18 @@
         position: relative;
     }
 
-        .line-dot:after {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            border: 1px solid rgba(0, 255, 247, 0.3);
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            animation: pulse 2s infinite;
-        }
+    .line-dot:after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border: 1px solid rgba(0, 255, 247, 0.3);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: pulse 2s infinite;
+    }
 
     .mission-content {
         display: flex;
@@ -547,6 +539,7 @@
         color: #00FFF7;
         font-size: 24px;
         margin-bottom: 20px;
+        line-height: 1.3;
     }
 
     .mission-text {
@@ -595,15 +588,14 @@
     }
 
     .values-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 30px;
+        justify-items: center;
     }
 
     .value-item {
-        flex: 1;
-        min-width: 250px;
+        width: 100%;
         max-width: 350px;
         background: linear-gradient(145deg, #111922, #0a0e14);
         border: 1px solid rgba(0, 255, 247, 0.1);
@@ -614,10 +606,10 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-        .value-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
-        }
+    .value-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+    }
 
     .value-icon {
         display: flex;
@@ -637,6 +629,7 @@
     .value-item p {
         color: #FFFFFF;
         line-height: 1.6;
+        font-size: 14px;
     }
 
     .tech-blob {
@@ -666,21 +659,20 @@
     /* Team Section */
     .team-section {
         position: relative;
-        padding: 100px 0;
+        padding: 80px 0;
         background-color: #0d1117;
         overflow: hidden;
     }
 
     .team-grid {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 40px;
+        justify-items: center;
     }
 
     .team-card {
-        flex: 1;
-        min-width: 300px;
+        width: 100%;
         max-width: 350px;
         background: linear-gradient(145deg, #131b26, #0b0f15);
         border: 1px solid rgba(0, 255, 247, 0.1);
@@ -691,10 +683,10 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-        .team-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-        }
+    .team-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
 
     .member-photo {
         height: 200px;
@@ -707,6 +699,15 @@
         width: 100%;
         background: linear-gradient(145deg, #1d2836, #131b26);
         position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .photo-placeholder img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
     .tech-scan {
@@ -730,6 +731,7 @@
         color: #00FFF7;
         font-size: 22px;
         margin-bottom: 5px;
+        line-height: 1.3;
     }
 
     .member-position {
@@ -750,17 +752,20 @@
     .social-links {
         display: flex;
         gap: 15px;
+        justify-content: center;
     }
 
     .social-link {
         color: #00FFF7;
         font-size: 18px;
-        transition: opacity 0.3s ease;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        padding: 8px;
     }
 
-        .social-link:hover {
-            opacity: 0.7;
-        }
+    .social-link:hover {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
 
     .data-stream {
         position: absolute;
@@ -785,7 +790,7 @@
     /* Why Choose Us Section */
     .why-choose-section {
         position: relative;
-        padding: 100px 0;
+        padding: 80px 0;
         background-color: #0d1117;
         overflow: hidden;
     }
@@ -794,9 +799,12 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 30px;
+        justify-items: center;
     }
 
     .feature-card {
+        width: 100%;
+        max-width: 300px;
         background: linear-gradient(145deg, #131b26, #0b0f15);
         border: 1px solid rgba(0, 255, 247, 0.1);
         border-radius: 12px;
@@ -806,10 +814,10 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
-        }
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+    }
 
     .feature-icon {
         display: flex;
@@ -824,6 +832,7 @@
         color: #00FFF7;
         font-size: 20px;
         margin-bottom: 15px;
+        line-height: 1.3;
     }
 
     .feature-description {
@@ -856,7 +865,7 @@
     /* CTA Section */
     .cta-section {
         position: relative;
-        padding: 100px 0;
+        padding: 80px 0;
         background-color: #0d1117;
         overflow: hidden;
     }
@@ -873,12 +882,14 @@
         align-items: center;
         justify-content: space-between;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        gap: 30px;
     }
 
     .cta-content {
         flex: 1 1 60%;
         position: relative;
         z-index: 2;
+        min-width: 300px;
     }
 
     .cta-title {
@@ -886,6 +897,7 @@
         color: #00FFF7;
         font-size: 32px;
         margin-bottom: 20px;
+        line-height: 1.3;
     }
 
     .cta-text {
@@ -899,23 +911,392 @@
     .cta-button {
         display: inline-flex;
         align-items: center;
+        gap: 10px;
         background-color: #00FFF7;
         color: #0d1117;
-        padding: 12px 28px;
+        padding: 15px 30px;
         border-radius: 10px;
         font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 16px;
     }
 
+    .cta-button:hover {
+        background-color: rgba(0, 255, 247, 0.9);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0, 255, 247, 0.3);
+    }
+
+    .cta-decoration {
+        flex: 1 1 30%;
+        min-width: 200px;
+        height: 150px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .tech-rings {
+        width: 120px;
+        height: 120px;
+        border: 2px solid rgba(0, 255, 247, 0.3);
+        border-radius: 50%;
+        position: relative;
+        animation: rotate 10s linear infinite;
+    }
+
+    .tech-rings::before {
+        content: '';
+        position: absolute;
+        width: 80px;
+        height: 80px;
+        border: 1px solid rgba(0, 255, 247, 0.2);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: rotate 8s linear infinite reverse;
+    }
+
+    .pulse-dot {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background-color: #00FFF7;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    .graph-lines {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: linear-gradient(rgba(0, 255, 247, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 247, 0.05) 1px, transparent 1px);
+        background-size: 50px 50px;
+        z-index: 0;
+        opacity: 0.3;
+    }
+
+    /* Animations */
+    @@keyframes fadeInGrid {
+        to { opacity: 1; }
+    }
+
+    @@keyframes fadeIn {
+        to { opacity: 1; }
+    }
 
     @@keyframes pulse {
-        0% {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 1;
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.1); }
+    }
+
+    @@keyframes pulseHex {
+        0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.3; }
+        50% { transform: scale(1.1) rotate(5deg); opacity: 0.6; }
+    }
+
+    @@keyframes floatElement {
+        0%, 100% { transform: perspective(500px) rotateY(30deg) translateY(0); }
+        50% { transform: perspective(500px) rotateY(30deg) translateY(-20px); }
+    }
+
+    @@keyframes badgeGlow {
+        0% { left: -20px; }
+        100% { left: 120%; }
+    }
+
+    @@keyframes pulseRing {
+        0%, 100% { transform: scale(1); opacity: 0.3; }
+        50% { transform: scale(1.1); opacity: 0.6; }
+    }
+
+    @@keyframes scanDown {
+        0% { top: 0; }
+        100% { top: 100%; }
+    }
+
+    @@keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 1024px) {
+        .container {
+            padding: 0 24px;
         }
 
-        100% {
-            transform: translate(-50%, -50%) scale(1.5);
-            opacity: 0;
+        .hero-title {
+            font-size: 40px;
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+        }
+
+        .section-title {
+            font-size: 32px;
+        }
+
+        .mission-section,
+        .team-section,
+        .why-choose-section,
+        .cta-section {
+            padding: 60px 0;
+        }
+
+        .tech-hexagon {
+            width: 250px;
+            height: 220px;
+        }
+
+        .tech-circuit {
+            width: 150px;
+            height: 250px;
+        }
+
+        .values-container {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .container {
+            padding: 0 20px;
+        }
+
+        .hero-section {
+            min-height: 400px;
+            padding: 60px 0 30px;
+        }
+
+        .hero-title {
+            font-size: 32px;
+        }
+
+        .hero-subtitle {
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 28px;
+        }
+
+        .mission-section,
+        .team-section,
+        .why-choose-section,
+        .cta-section {
+            padding: 50px 0;
+        }
+
+        .mission-card {
+            padding: 30px 20px;
+        }
+
+        .mission-title {
+            font-size: 20px;
+        }
+
+        .mission-text {
+            font-size: 15px;
+        }
+
+        .values-container {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .value-item {
+            max-width: 100%;
+            padding: 25px 20px;
+        }
+
+        .team-grid {
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .team-card {
+            max-width: 100%;
+        }
+
+        .features-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            max-width: 100%;
+            padding: 25px 20px;
+        }
+
+        .cta-container {
+            padding: 40px 30px;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .cta-title {
+            font-size: 26px;
+        }
+
+        .cta-content {
+            flex: 1 1 100%;
+        }
+
+        .cta-decoration {
+            flex: 1 1 100%;
+        }
+
+        /* Hide/reduce tech elements on mobile */
+        .tech-hexagon,
+        .tech-circuit {
+            display: none;
+        }
+
+        .tech-pulse {
+            width: 100px;
+            height: 100px;
+        }
+
+        .tech-blob {
+            width: 300px;
+            height: 300px;
+        }
+
+        .hex-pattern {
+            width: 200px;
+            height: 200px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .container {
+            padding: 0 15px;
+        }
+
+        .hero-title {
+            font-size: 28px;
+        }
+
+        .hero-subtitle {
+            font-size: 14px;
+        }
+
+        .section-title {
+            font-size: 24px;
+        }
+
+        .mission-section,
+        .team-section,
+        .why-choose-section,
+        .cta-section {
+            padding: 40px 0;
+        }
+
+        .mission-card {
+            padding: 25px 15px;
+        }
+
+        .mission-title {
+            font-size: 18px;
+        }
+
+        .value-item,
+        .feature-card {
+            padding: 20px 15px;
+        }
+
+        .team-card .member-info {
+            padding: 20px 15px;
+        }
+
+        .member-name {
+            font-size: 20px;
+        }
+
+        .member-bio {
+            font-size: 13px;
+        }
+
+        .cta-container {
+            padding: 30px 20px;
+        }
+
+        .cta-title {
+            font-size: 22px;
+        }
+
+        .cta-text {
+            font-size: 14px;
+        }
+
+        .cta-button {
+            padding: 12px 24px;
+            font-size: 14px;
+        }
+
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .feature-title {
+            font-size: 18px;
+        }
+
+        .feature-description {
+            font-size: 13px;
+        }
+    }
+
+    @@media (max-width: 320px) {
+        .container {
+            padding: 0 10px;
+        }
+
+        .hero-title {
+            font-size: 24px;
+        }
+
+        .section-title {
+            font-size: 20px;
+        }
+
+        .mission-title {
+            font-size: 16px;
+        }
+
+        .cta-title {
+            font-size: 20px;
+        }
+
+        .badge-text {
+            font-size: 12px;
+        }
+
+        .value-item h4,
+        .feature-title {
+            font-size: 16px;
+        }
+
+        .member-name {
+            font-size: 18px;
+        }
+
+        .tech-rings {
+            width: 80px;
+            height: 80px;
+        }
+
+        .tech-rings::before {
+            width: 50px;
+            height: 50px;
         }
     }
 </style>
