@@ -12,11 +12,13 @@ using Newtonsoft.Json;
 
 namespace IT_Solution_Platform.Controllers
 {
+    [Authorize]
     public class ProfileController : Controller
     {
         private readonly ServiceRequestService _serviceRequestService;
         private readonly AuditLogService _auditLogService;
         private readonly SupabaseDatabase _database;
+        private SupabaseAuthService _supabaseAuth;
 
         public ProfileController()
         {
@@ -25,6 +27,15 @@ namespace IT_Solution_Platform.Controllers
             _auditLogService = new AuditLogService(_database);
         }
 
+
+        public SupabaseAuthService GetAuthService() 
+        {
+            if (_supabaseAuth == null) 
+            {
+                _supabaseAuth = new SupabaseAuthService();
+            }
+            return _supabaseAuth;
+        }
         /// <summary>
         /// Action for displaying user's service orders with enhanced security and full data retrieval
         /// </summary>
@@ -101,6 +112,110 @@ namespace IT_Solution_Platform.Controllers
             }
         }
 
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            try
+            {
+                if (!Request.IsAuthenticated)
+                {
+                    return Json(new { success = false, message = "You must be logged in to change your password." });
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                    return Json(new { success = false, message = string.Join(", ", errors) });
+                }
+
+                // Additional server-side validation
+                if (model.CurrentPassword == model.NewPassword)
+                {
+                    return Json(new { success = false, message = "New password must be different from current password." });
+                }
+
+                // Get current user info
+                var userEmail = User.Identity.Name;
+                var userId = GetUserIdFromClaims() ?? 0; 
+                var supbaseUid = GetSubabaseUidFromClaims();
+
+                if (string.IsNullOrEmpty(userEmail) || string.IsNullOrEmpty(supbaseUid))
+                {
+                    return Json(new { success = false, message = "Unable to retrieve user information." });
+                }
+
+                // Verify current password by attempting to sign in
+                var signInResult = await GetAuthService().SignInWithEmailAsync(userEmail, model.CurrentPassword);
+                if (string.IsNullOrEmpty(signInResult.AccessToken))
+                {
+                    _auditLogService.LogAudit(
+                        userId,
+                        "Password Change Failed - Invalid Current Password",
+                        "User",
+                        null,
+                        new { Email = userEmail },
+                        Request.UserHostAddress,
+                        Request.UserAgent
+                    );
+                    return Json(new { success = false, message = "Current password is incorrect." });
+                }
+
+                // Update password using the access token from sign-in
+                var updateResult = await _supabaseAuth.ResetUserPasswordAsync(
+                    supbaseUid,
+                    model.NewPassword
+                );
+
+                if (updateResult.Success)
+                {
+                    _auditLogService.LogAudit(
+                        userId,
+                        "Password Changed Successfully",
+                        "User",
+                        null,
+                        new { Email = userEmail },
+                        Request.UserHostAddress,
+                        Request.UserAgent
+                    );
+                    await GetAuthService().SignOutAsync();
+
+                    return Json(new { success = true, message = "Password updated successfully!" });
+                }
+                else
+                {
+                    _auditLogService.LogAudit(
+                        userId,
+                        "Password Change Failed",
+                        "User",
+                        null,
+                        new { Email = userEmail, Error = updateResult.Message },
+                        Request.UserHostAddress,
+                        Request.UserAgent
+                    );
+
+                    return Json(new { success = false, message = updateResult.Message ?? "Failed to update password." });
+                }
+            }
+            catch (Exception ex)
+            {
+                var userId = GetUserIdFromClaims() ?? 0;
+                _auditLogService.LogAudit(
+                    userId,
+                    "Password Change Error",
+                    "User",
+                    null,
+                    new { Error = ex.Message },
+                    Request.UserHostAddress,
+                    Request.UserAgent
+                );
+
+                return Json(new { success = false, message = "An unexpected error occurred. Please try again." });
+            }
+        }
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DownloadReceipt(string orderData)
@@ -151,7 +266,20 @@ namespace IT_Solution_Platform.Controllers
             return int.TryParse(userIdClaim, out int userId) ? userId : (int?)null;
         }
 
-       
+        private string GetSubabaseUidFromClaims()
+        {
+            if (!(User.Identity is ClaimsIdentity identity))
+                return null;
+
+            // Try multiple claim types for user ID
+            var userIdClaim = identity.FindFirst("SupabaseUserId")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+                return null;
+
+            return userIdClaim;
+        }
+
+
 
         /// <summary>
         /// Get user display name for UI

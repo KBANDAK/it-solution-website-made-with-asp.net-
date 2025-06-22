@@ -33,8 +33,8 @@ namespace IT_Solution_Platform.Controllers
             // Check if user is authenticated
             if (!User.Identity.IsAuthenticated)
             {
-                ViewBag.ErrorMessage = "You must be logged in to access the services page.";
-                return View("Error");
+                
+                return RedirectToAction("Login", "Account");
             }
 
             ViewBag.Message = "Your services page.";

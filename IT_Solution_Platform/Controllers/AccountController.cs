@@ -71,7 +71,7 @@ namespace IT_Solution_Platform.Controllers
                     return View(model);
                 }
 
-                var redirectUrl = Url.Action("Verify", "Account", null, Request.Url.Scheme);
+                var redirectUrl = Url.Action("Verify", "Account", null, Request.Url.Scheme); 
                 var options = new SignUpOptions { RedirectTo = redirectUrl };
 
                 // Register user with Supabase
@@ -420,7 +420,7 @@ namespace IT_Solution_Platform.Controllers
                 if (success)
                 {
                     TempData["SuccessMessage"] = "Your password has been reset successfully. Please log in with your new password.";
-                    return RedirectToAction("Login");
+                    return View(model); // Stay on the same page to show the message
                 }
                 else
                 {
@@ -476,9 +476,7 @@ namespace IT_Solution_Platform.Controllers
         #region Profiles Methods
 
         [HttpGet]
-        [Authorize]
-        [ActionName("Profile")]
-
+        
         public async Task<ActionResult> UserProfile()
         {
             try

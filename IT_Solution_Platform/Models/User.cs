@@ -84,7 +84,7 @@ namespace IT_Solution_Platform.Models
         /// The timestamp of the user's last login.
         /// </summary>
         [Column("last_login")]
-        public DateTime? last_login { get; set; } = DateTime.UtcNow;
+        public DateTime? last_login { get; set; }
 
         /// <summary>
         /// The token used for password reset (optional).
@@ -103,13 +103,13 @@ namespace IT_Solution_Platform.Models
         /// The timestamp when the user was created.
         /// </summary>
         [Column("created_at")]
-        public DateTime? created_at { get; set; }
+        public DateTime created_at { get; set; }
 
         /// <summary>
         /// The timestamp when the user was last updated.
         /// </summary>
         [Column("updated_at")]
-        public DateTime? updated_at { get; set; }
+        public DateTime updated_at { get; set; }
 
         /// <summary>
         /// The Supabase user ID (unique, links to Supabase auth).
@@ -131,5 +131,24 @@ namespace IT_Solution_Platform.Models
         public String Name => email;
 
         public String FullName => FullNameS;
+    }
+
+    public class ChangeUserPasswordViewModel
+    {
+        [Required(ErrorMessage = "Current password is required")]
+        [DataType(DataType.Password)]
+        [Display(Name = "Current Password")]
+        public string CurrentPassword { get; set; }
+
+        [Required(ErrorMessage = "New password is required")]
+        [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 8)]
+        [DataType(DataType.Password)]
+        [Display(Name = "New Password")]
+        public string NewPassword { get; set; }
+
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirm New Password")]
+        [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
+        public string ConfirmPassword { get; set; }
     }
 }

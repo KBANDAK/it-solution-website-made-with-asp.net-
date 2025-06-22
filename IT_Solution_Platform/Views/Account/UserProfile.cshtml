@@ -394,6 +394,131 @@
                 border: 1px solid var(--error-color);
             }
 
+            /* Password Reset Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--glass-bg) !important;
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            margin: 5% auto;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @@keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text-bright);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .close {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .close:hover {
+            color: var(--text-bright);
+        }
+
+        .password-form-field {
+            margin-bottom: 1.5rem;
+        }
+
+        .password-form-field label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .password-input {
+            background: var(--input-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: var(--text-bright);
+            font-size: 1rem;
+            width: 100%;
+            transition: var(--transition);
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.2);
+        }
+
+        .password-requirements {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .contact-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .contact-link:hover {
+            color: var(--primary-light);
+            text-decoration: underline;
+        }
+
         @@keyframes slideInDown {
             from {
                 opacity: 0;
@@ -472,7 +597,7 @@
                         <span id="user-initials">@(string.IsNullOrEmpty(Model.FirstName) ? "--" : Model.FirstName[0].ToString().ToUpper() + (string.IsNullOrEmpty(Model.LastName) ? "" : Model.LastName[0].ToString().ToUpper()))</span>
                     </div>
                 </div>
-                <div class="user-name">@(Model.FirstName + " " + Model.LastName)</div>
+                <div class="user-name" id="user-name">@(Model.FirstName + " " + Model.LastName)</div>
                 <div class="user-role">@(Model.RoleName ?? "None")</div>
                 <div id="edit-buttons">
                     <button class="edit-button" onclick="toggleEditMode()">
@@ -562,12 +687,12 @@
                 <i class="fas fa-shield-alt"></i> Security & Authentication
             </h2>
             <div class="security-grid">
-                <div class="security-item">
+                <div class="security-item clickable" onclick="openPasswordModal()">
                     <div class="security-icon">
                         <i class="fas fa-key"></i>
                     </div>
-                    <div class="security-title">Password</div>
-                    <div class="security-desc">Your password is managed securely through Supabase authentication</div>
+                    <div class="security-title">Change Password</div>
+                    <div class="security-desc">Update your account password securely</div>
                 </div>
                 <div class="security-item">
                     <div class="security-icon">
@@ -585,6 +710,50 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+
+<!-- Password Reset Modal -->
+<div id="passwordModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closePasswordModal()">&times;</span>
+        <div class="modal-header">
+            <h2 class="modal-title">Change Password</h2>
+            <p class="modal-subtitle">Enter your current password and choose a new one</p>
+        </div>
+
+        <form id="passwordForm">
+            <div class="password-form-field">
+                <label for="currentPassword">Current Password</label>
+                <input type="password" class="password-input" id="currentPassword" placeholder="Enter your current password" required />
+                <div class="password-requirements">
+                    <small>Don't remember your current password? <a href="#" class="contact-link" onclick="redirectToContact()">Contact Support</a></small>
+                </div>
+            </div>
+
+            <div class="password-form-field">
+                <label for="newPassword">New Password</label>
+                <input type="password" class="password-input" id="newPassword" placeholder="Enter your new password" required />
+                <div class="password-requirements">
+                    <small>Password must be at least 8 characters long with uppercase, lowercase, numbers, and special characters.</small>
+                </div>
+            </div>
+
+            <div class="password-form-field">
+                <label for="confirmPassword">Confirm New Password</label>
+                <input type="password" class="password-input" id="confirmPassword" placeholder="Confirm your new password" required />
+            </div>
+
+            <div class="modal-buttons">
+                <button type="submit" class="edit-button">
+                    <i class="fas fa-save"></i> Update Password
+                </button>
+                <button type="button" class="cancel-button" onclick="closePasswordModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -687,7 +856,7 @@
                     document.getElementById('display-firstname').textContent = firstName;
                     document.getElementById('display-lastname').textContent = lastName;
                     document.getElementById('display-phone').textContent = phoneNumber || 'N/A';
-                    document.getElementById('display-name').textContent = `${firstName} ${lastName}`;
+                    document.getElementById('user-name').textContent = `${firstName} ${lastName}`;
 
                     // Update avatar initials
                     const initials = (firstName[0] || '') + (lastName[0] || '');
@@ -710,6 +879,122 @@
                 showMessage('An error occurred while updating your profile. Please try again.', 'error');
             } finally {
                 setLoadingState(false);
+            }
+        }
+
+        // Password Modal Functions
+        function openPasswordModal() {
+            document.getElementById('passwordModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            clearMessages();
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+
+            // Clear form
+            document.getElementById('passwordForm').reset();
+            clearMessages();
+        }
+
+        function redirectToContact() {
+            window.location.href = '@Url.Action("Contact", "Home")';
+        }
+
+
+        // Password form validation and submission
+        document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Validate inputs
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showMessage('All password fields are required', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showMessage('New passwords do not match', 'error');
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                showMessage('New password must be at least 8 characters long', 'error');
+                return;
+            }
+
+            if (currentPassword === newPassword) {
+                showMessage('New password must be different from current password', 'error');
+                return;
+            }
+
+            // Password strength validation
+            const hasUpper = /[A-Z]/.test(newPassword);
+            const hasLower = /[a-z]/.test(newPassword);
+            const hasNumber = /\d/.test(newPassword);
+            const hasSpecial = /[!@@#$%^&*(),.?":{}|<>]/.test(newPassword);
+
+            if (!(hasUpper && hasLower && hasNumber && hasSpecial)) {
+                showMessage('New password must include uppercase, lowercase, numbers, and special characters', 'error');
+                return;
+            }
+
+            setLoadingState(true);
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value ||
+                             document.querySelector('meta[name="__RequestVerificationToken"]')?.content;
+
+                const formData = new FormData();
+                formData.append('currentPassword', currentPassword);
+                formData.append('newPassword', newPassword);
+                formData.append('confirmPassword', confirmPassword);
+
+                if (token) {
+                    formData.append('__RequestVerificationToken', token);
+                }
+
+                const response = await fetch('@Url.Action("ChangePassword", "Profile")', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showMessage(result.message || 'Password updated successfully!', 'success');
+                    setTimeout(() => {
+                        closePasswordModal();
+                    }, 2000);
+                } else {
+                    showMessage(result.message || 'Failed to update password', 'error');
+                }
+
+            } catch (error) {
+                console.error('Error updating password:', error);
+                showMessage('An error occurred while updating your password. Please try again.', 'error');
+            } finally {
+                setLoadingState(false);
+            }
+        });
+
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            const modal = document.getElementById('passwordModal');
+            if (event.target === modal) {
+                closePasswordModal();
             }
         }
 

@@ -78,7 +78,7 @@ namespace IT_Solution_Platform.Services
                 }*/
 
                 // Get default role (e.g., role_id = 1 for normal users
-                var roles = _database.ExecuteQuery<Role>("SELECT * FROM roles where role_id = @role_id", new { role_id = 1 });
+                var roles = _database.ExecuteQuery<Role>("SELECT * FROM roles where role_id = @role_id", new { role_id = 1 }); // User
                 var defaultRole = roles.FirstOrDefault();
                 if (defaultRole == null)
                 {
@@ -436,6 +436,37 @@ namespace IT_Solution_Platform.Services
             }
         }
 
+        public async Task<(bool Success,  string Message)> ResetUserPasswordAsync(string subabaseUid, string password)
+        {
+            try
+            {
+                
+
+                // Update user password using Supabase Auth Admin API
+                // Note: This requires proper Supabase setup with service role key
+                var authResponse = await _supabaseClient.AdminAuth(SupabaseConfig.SupabaseServiceKey).UpdateUserById(
+                    subabaseUid,
+                    new Supabase.Gotrue.AdminUserAttributes
+                    {
+                        Password = password
+                    }
+                );
+
+                if (authResponse != null)
+                {
+                    string message = "Password Reset Sucessfully!";
+                    return (true, message);
+                }
+
+                return (false, "Failed to reset password");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error resetting password: {ex.Message}");
+                return (false, $"Error: {ex.Message}");
+            }
+        }
+
 
         public async Task<Supabase.Gotrue.User> GetUserByTokenAsync(string accessToken)
         {
@@ -530,7 +561,7 @@ namespace IT_Solution_Platform.Services
                 authManager.SignIn(new AuthenticationProperties
                 {
                     IsPersistent = false,
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(24)
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(1)
                 }, identity);
 
                 // Also set FormsAuthentication cookie for compatibility
@@ -558,7 +589,10 @@ namespace IT_Solution_Platform.Services
             try
             {
                 // Sign out from Supabase
-                await _supabaseClient.Auth.SignOut();
+                if (_supabaseClient.Auth != null) 
+                {
+                    await _supabaseClient.Auth.SignOut();
+                }
 
                 // Sign out from OWIN
                 var authManager = HttpContext.Current.GetOwinContext().Authentication;

@@ -344,8 +344,8 @@
     <Content Include="Content\images\Icons\web-development.png" />
     <Content Include="Content\images\Logo_SecuDev.png" />
     <Content Include="Content\images\Placeholders\abughoush-placeholder.png" />
-    <Content Include="Content\images\Placeholders\abukhass-placeholder.png" />
-    <Content Include="Content\images\Placeholders\khader-placeholder.png" />
+    <Content Include="Content\images\Placeholders\abukhass-placeholder.jpg" />
+    <Content Include="Content\images\Placeholders\khader-placeholder.jpg" />
     <Content Include="Content\images\Placeholders\omar-placeholder.png" />
     <Content Include="Content\index\index.css" />
     <Content Include="favicon.ico" />
@@ -402,7 +402,7 @@
     <Content Include="Views\Service\RequestSubmitted.cshtml" />
     <Content Include="Views\Service\MobileWebApp.cshtml" />
     <Content Include="Views\Service\NetworkService.cshtml" />
-    <Content Include="Views\Account\Profile.cshtml" />
+    <Content Include="Views\Account\UserProfile.cshtml" />
     <Content Include="Views\Profile\ServiceOrdersAsync.cshtml" />
   </ItemGroup>
   <ItemGroup>

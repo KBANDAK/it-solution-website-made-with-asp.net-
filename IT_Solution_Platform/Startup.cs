@@ -17,7 +17,7 @@ namespace IT_Solution_Platform
             {
                 AuthenticationType = "ApplicationCookie",
                 LoginPath = new PathString("/Account/Login"),
-                ExpireTimeSpan = TimeSpan.FromHours(24),
+                ExpireTimeSpan = TimeSpan.FromHours(1),
                 SlidingExpiration = true,
                 CookieName = "SupabaseAuth",
                 CookieSecure = CookieSecureOption.SameAsRequest
