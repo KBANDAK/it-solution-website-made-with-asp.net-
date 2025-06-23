@@ -476,7 +476,6 @@ namespace IT_Solution_Platform.Controllers
         #region Profiles Methods
 
         [HttpGet]
-        
         public async Task<ActionResult> UserProfile()
         {
             try
@@ -499,16 +498,6 @@ namespace IT_Solution_Platform.Controllers
                     return View("Error");
                 }
 
-                // Query user from database with role information
-                /*var query = @"
-            SELECT u.user_id, u.email, u.first_name, u.last_name, u.phone_number,
-                   u.is_active, u.created_at, u.updated_at, u.supabase_uid,
-                   u.role_id, u.password_hash, u.profile_picture, u.last_login,
-                   u.reset_token, u.reset_token_expires,
-                   r.role_name
-            FROM users u
-            LEFT JOIN roles r ON u.role_id = r.role_id
-            WHERE u.user_id = @UserId";*/
 
                 var user = await _authService.GetUser(claimsIdentity.Name);
 

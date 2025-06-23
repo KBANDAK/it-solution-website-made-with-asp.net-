@@ -12,7 +12,6 @@ using Newtonsoft.Json;
 
 namespace IT_Solution_Platform.Controllers
 {
-    [Authorize]
     public class ProfileController : Controller
     {
         private readonly ServiceRequestService _serviceRequestService;
@@ -43,17 +42,6 @@ namespace IT_Solution_Platform.Controllers
         [ActionName("ServiceOrders")]
         public async Task<ActionResult> ServiceOrdersAsync()
         {
-            // Enhanced authentication check
-            if (!User.Identity.IsAuthenticated)
-            {
-                _auditLogService.LogAudit(0, "ServiceOrders", "UnauthorizedAccess", null,
-                    new { Message = "Unauthenticated user attempted to access service orders" },
-                    Request.UserHostAddress, Request.UserAgent);
-
-                ViewBag.ErrorMessage = "You must be logged in to view your service orders.";
-                return RedirectToAction("Login", "Account");
-            }
-
             try
             {
                 // Enhanced user ID extraction with multiple fallbacks
@@ -305,17 +293,10 @@ namespace IT_Solution_Platform.Controllers
         {
             foreach (var request in requests)
             {
-                // Remove or mask sensitive data that shouldn't be shown to end users
-                // For example, internal notes might contain sensitive information
                 if (!string.IsNullOrEmpty(request.notes))
                 {
-                    // You might want to filter out internal notes or mask certain content
-                    // This is just an example - adjust based on your business rules
                     request.notes = FilterInternalNotes(request.notes);
                 }
-
-                // Ensure approved_by is not exposing internal user IDs inappropriately
-                // You might want to replace with approver name instead of ID
             }
 
             return requests;

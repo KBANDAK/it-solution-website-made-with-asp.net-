@@ -380,35 +380,35 @@
         }
 
     .status-submitted {
-        background: rgba(0, 229, 255, 0.2);
+        background: rgba(0, 229, 255, 0.2) !important;
         color: var(--primary-color);
         border-color: rgba(0, 229, 255, 0.5);
         box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
     }
 
     .status-pending {
-        background: rgba(255, 170, 0, 0.2);
+        background: rgba(255, 170, 0, 0.2) !important;
         color: var(--warning-color);
         border-color: rgba(255, 170, 0, 0.5);
         box-shadow: 0 0 10px rgba(255, 170, 0, 0.3);
     }
 
     .status-inprogress {
-        background: rgba(0, 187, 255, 0.2);
+        background: rgba(0, 187, 255, 0.2) !important;
         color: var(--primary-dim);
         border-color: rgba(0, 187, 255, 0.5);
         box-shadow: 0 0 10px rgba(0, 187, 255, 0.3);
     }
 
     .status-completed {
-        background: rgba(0, 255, 136, 0.2);
+        background: rgba(0, 255, 136, 0.2) !important;
         color: var(--success-color);
         border-color: rgba(0, 255, 136, 0.5);
         box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
     }
 
     .status-rejected {
-        background: rgba(255, 68, 68, 0.2);
+        background: rgba(255, 68, 68, 0.2) !important;
         color: var(--error-color);
         border-color: rgba(255, 68, 68, 0.5);
         box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
@@ -1092,7 +1092,7 @@
                                 <br><small>Order #@orderNumber (ID: @order.request_id)</small>
                             </div>
                             <div>
-                                <span class="status-badge status-@(order.status_name?.ToLower())">@order.status_name</span>
+                                <span class="status-badge status-@(order.status_name?.ToLower() == "in progress" ? "inprogress" : order.status_name.ToLower())">@order.status_name</span>
                             </div>
                             <div class="priority-@order.PriorityText?.ToLower()">@order.PriorityText</div>
                             <div>@(order.total_amount.HasValue ? order.FormattedTotalAmount : "N/A")</div>
@@ -1117,7 +1117,8 @@
                                     </h3>
                                     <p class="order-id">Order #@orderNumber (ID: @order.request_id)</p>
                                 </div>
-                                <span class="status-badge status-@(order.status_name)" style="background-color: @order.status_color_code">
+                                <span class="status-badge status-@(order.status_name?.ToLower() == "in progress" ? "inprogress" : order.status_name.ToLower())"
+                                      style="background-color: @order.status_color_code">
                                     @order.status_name
                                 </span>
                             </div>
@@ -1298,27 +1299,27 @@
                             </button>
 
                             @if (order.status_name?.ToLower() == "pending")
-                            {
+                             {
                                 <button class="btn-tech" onclick="startPayment(@order.request_id, '@order.FormattedTotalAmount')" aria-label="Pay for order @order.request_id">
                                     <i class="fas fa-credit-card tech-icon" aria-hidden="true"></i>
                                     Payment (@order.FormattedTotalAmount)
                                 </button>
-                            }
+                             }
 
                             @if (order.status_name?.ToLower() == "completed")
-                            {
+                             {
                                 <button class="btn-tech btn-success"
                                         data-details="@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(System.Text.Json.JsonSerializer.Serialize(order)))"
                                         onclick="downloadReceipt(this)">
                                     <i class="fas fa-download tech-icon"></i> Download Receipt
                                 </button>
-                            }
+                             }
                         </div>
                         </div>
                     </div>
-                }
+                 }
             </div>
-        }
+         }
         else
         {
             <!-- Enhanced Empty State -->
@@ -1477,13 +1478,91 @@
     }
 
     try {
-        // Try fixing common escape issues
+        // Fix the specific issue with escaped ampersands and other unnecessary escapes
+        jsonString = jsonString
+            .replace(/\\&/g, '&')          // Fix escaped ampersands
+            .replace(/\\'/g, "'")          // Fix escaped single quotes
+            .replace(/\\#/g, '#')          // Fix escaped hash symbols
+            .replace(/\\%/g, '%')          // Fix escaped percent symbols
+            .replace(/\\@@/g, '@@')          // Fix escaped at symbols
+            .replace(/\\\$/g, '$')         // Fix escaped dollar symbols
+            .replace(/\\!/g, '!')          // Fix escaped exclamation marks
+            .replace(/\\\?/g, '?')         // Fix escaped question marks
+            .replace(/\\=/g, '=')          // Fix escaped equals signs
+            .replace(/\\+/g, '+')          // Fix escaped plus signs
+            .replace(/\\-/g, '-')          // Fix escaped minus signs
+            .replace(/\\\*/g, '*')         // Fix escaped asterisks
+            .replace(/\\\^/g, '^')         // Fix escaped carets
+            .replace(/\\~/g, '~')          // Fix escaped tildes
+            .replace(/\\`/g, '`')          // Fix escaped backticks
+            .replace(/\\\|/g, '|')         // Fix escaped pipes
+            .replace(/\\</g, '<')          // Fix escaped less than
+            .replace(/\\>/g, '>')          // Fix escaped greater than
+            .replace(/\\;/g, ';')          // Fix escaped semicolons
+            .replace(/\\:/g, ':')          // Fix escaped colons
+            .replace(/\\\(/g, '(')         // Fix escaped opening parentheses
+            .replace(/\\\)/g, ')')         // Fix escaped closing parentheses
+            .replace(/\\\[/g, '[')         // Fix escaped opening brackets
+            .replace(/\\\]/g, ']')         // Fix escaped closing brackets
+            .replace(/\\\{/g, '{')         // Fix escaped opening braces
+            .replace(/\\\}/g, '}');        // Fix escaped closing braces
+
+        const order = JSON.parse(jsonString);
+        showOrderDetails(order);
+        return;
+    } catch (e) {
+        console.log('Symbol fixes failed, trying standard escape fixes...');
+    }
+
+    try {
+        // Try fixing common escape issues (but keep necessary escapes)
         jsonString = jsonString
             .replace(/\\"/g, '"')          // Fix escaped quotes
             .replace(/\\\\/g, '\\')        // Fix double backslashes
             .replace(/\\n/g, '\n')         // Fix newlines
             .replace(/\\r/g, '\r')         // Fix carriage returns
             .replace(/\\t/g, '\t');        // Fix tabs
+
+        const order = JSON.parse(jsonString);
+        showOrderDetails(order);
+        return;
+    } catch (e) {
+        console.log('Standard escape fixes failed, trying request_details specific fix...');
+    }
+
+    try {
+        // Fix the specific issue with request_details containing unescaped JSON
+        // Find the request_details field and properly escape its JSON content
+        jsonString = jsonString.replace(
+            /"request_details":"({[^}]*(?:{[^}]*}[^}]*)*})"/g,
+            function(match, innerJson) {
+                // Escape quotes in the inner JSON
+                const escapedInnerJson = innerJson.replace(/"/g, '\\"');
+                return `"request_details":"${escapedInnerJson}"`;
+            }
+        );
+
+        const order = JSON.parse(jsonString);
+        showOrderDetails(order);
+        return;
+    } catch (e) {
+        console.log('Request details fix failed, trying comprehensive fix...');
+    }
+
+    try {
+        // More comprehensive fix for nested JSON in request_details
+        // Look for the pattern: "request_details":"{ ... }"
+        const requestDetailsMatch = jsonString.match(/"request_details":"(\{.*?\})"/);
+        if (requestDetailsMatch) {
+            const originalInnerJson = requestDetailsMatch[1];
+            // Escape all quotes in the inner JSON
+            const escapedInnerJson = originalInnerJson.replace(/"/g, '\\"');
+            // Replace the original with the escaped version
+            jsonString = jsonString.replace(
+                `"request_details":"${originalInnerJson}"`,
+                `"request_details":"${escapedInnerJson}"`
+            );
+        }
 
         const order = JSON.parse(jsonString);
         showOrderDetails(order);
@@ -1500,7 +1579,7 @@
                 <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem; margin-bottom: 1rem;"></i>
                 <br>Failed to load order details. Invalid JSON format.
                 <br><br>
-                <button class="btn-tech btn-secondary" onclick="closeOrderDetailsModal()">Close</button>
+                <button class="btn-tech btn-secondary" onclick="closeOrderModal()">Close</button>
             </div>
         `;
         modal.style.display = 'flex';
@@ -1612,7 +1691,7 @@ function showOrderDetails(order) {
                 <div class="detail-section">
                     <h4>📱 Development Project Specifications</h4>
                     <p><strong>Project Name:</strong> ${details.ProjectName}</p>
-                    <p><strong>Project Description:</strong> ${details.ProjectDescription || 'N/A'}</p>
+                    ${details.ProjectDescription ? `<p><strong>Project Description:</strong> ${details.ProjectDescription}</p>` : ''}
                     <p><strong>Platform:</strong> ${details.Platform.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
                     <p><strong>Development Type:</strong> ${details.DevelopmentType.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
                 </div>
@@ -1663,7 +1742,7 @@ function showOrderDetails(order) {
     <div class="detail-section">
         <h4>📋 Order Status</h4>
         <p><strong>Order ID:</strong> ${order.request_id}</p>
-        <p><strong>Status:</strong> <span class="status-badge status-${order.status_name?.toLowerCase()}" style="background-color: ${order.status_color_code}; color:white;">${order.status_name}</span></p>
+        <p><strong>Status:</strong> <span class="status-badge status-${(order.status_name.toLowerCase() == "in progress" ? "inprogress" : order.status_name)}" style="background-color: ${order.status_color_code}; color:white;">${order.status_name}</span></p>
         <p><strong>Priority:</strong> ${order.PriorityText}</p>
         <p><strong>Requested:</strong> ${order.FormattedRequestedDate}</p>
         ${order.FormattedCompletionDate ? `<p><strong>Completed:</strong> ${order.FormattedCompletionDate}</p>` : ''}
