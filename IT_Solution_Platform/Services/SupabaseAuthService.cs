@@ -416,7 +416,12 @@ namespace IT_Solution_Platform.Services
 
                 if (response != null)
                 {
-                    _auditLog.LogAudit(0, "Password Updated Successfully", "User", Int32.Parse(response.Id), new { }, HttpContext.Current?.Request.UserHostAddress ?? "Unknown", HttpContext.Current?.Request.UserAgent ?? "Unknown");
+                    var user = await GetUser(response.Email);
+                    if (user == null) 
+                    {
+                        _auditLog.LogAudit(0, "Password Updated Successfully", "User", 0, new { }, HttpContext.Current?.Request.UserHostAddress ?? "Unknown", HttpContext.Current?.Request.UserAgent ?? "Unknown");
+                    }
+                    _auditLog.LogAudit(0, "Password Updated Successfully", "User", user.user_id, new { }, HttpContext.Current?.Request.UserHostAddress ?? "Unknown", HttpContext.Current?.Request.UserAgent ?? "Unknown");
                     return (true, "Password updated successfully.");
                 }
                 return (false, "Failed to update password.");
