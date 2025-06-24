@@ -364,7 +364,8 @@ namespace IT_Solution_Platform.Services
 
                 // Create the redirect URL properly
                 var request = HttpContext.Current.Request;
-                var redirectUrl = $"{request.Url.Scheme}://{request.Url.Authority}/Account/ResetPassword";
+                var applicationPath = request.ApplicationPath.TrimEnd('/');
+                var redirectUrl = $"{request.Url.Scheme}://{request.Url.Authority}{applicationPath}/Account/ResetPassword";
 
                 // Log the redirect URL for debugging
                 _auditLog.LogAudit(0, "Password Reset Redirect URL", "System", null, new { RedirectUrl = redirectUrl }, HttpContext.Current?.Request.UserHostAddress ?? "Unknown", HttpContext.Current?.Request.UserAgent ?? "Unknown");
@@ -416,7 +417,12 @@ namespace IT_Solution_Platform.Services
 
                 if (response != null)
                 {
-                    _auditLog.LogAudit(0, "Password Updated Successfully", "User", Int32.Parse(response.Id), new { }, HttpContext.Current?.Request.UserHostAddress ?? "Unknown", HttpContext.Current?.Request.UserAgent ?? "Unknown");
+                    var user = await GetUser(response.Email);
+                    if (user == null) 
+                    {
+                        _auditLog.LogAudit(0, "Password Updated Successfully", "User", 0, new { }, HttpContext.Current?.Request.UserHostAddress ?? "Unknown", HttpContext.Current?.Request.UserAgent ?? "Unknown");
+                    }
+                    _auditLog.LogAudit(0, "Password Updated Successfully", "User", user.user_id, new { }, HttpContext.Current?.Request.UserHostAddress ?? "Unknown", HttpContext.Current?.Request.UserAgent ?? "Unknown");
                     return (true, "Password updated successfully.");
                 }
                 return (false, "Failed to update password.");
