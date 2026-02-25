@@ -13,13 +13,12 @@ This is a service marketplace for IT solutions, allowing customers to hire cyber
 ## 💼 Tech Stack
 - **Backend:** ASP.NET MVC
 - **Frontend:** Razor, Bootstrap, Javascript
-- **Database:** PostgreSQL
 - **Server:** Nginx
 
 ## 🛠️ Setup Instructions
 1. Clone the repository:
     ```sh
-    git clone https://github.com/IT-Solutions-Platform/it-solutions-website.git
+    git clone https://github.com/it-solution-website-made-with-asp.net-
 2. Open the project in Visual Studio
 3. Run:
     ```sh
